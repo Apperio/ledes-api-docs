@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ReDoc</title>
+    <title>LEDES API Specification</title>
     <!-- needed for adaptive design -->
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,5 +20,28 @@
   <body>
     <redoc spec-url='ledes.json'></redoc>
     <script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"> </script>
+    <script>
+      Redoc.init('/openapifile', {
+        theme: {
+          colors: {
+            success: {
+              main: '#59a815'
+            },
+            error: {
+              main: '#f54844'
+            },
+            http: {
+              get: '#59a815'
+            },
+          },
+          typography: {
+            fontFamily: 'Lato,Helvetica,Arial,sans-serif',
+            headings: {
+              fontFamily: 'Lato,Helvetica,Arial,sans-serif',
+            }
+          },
+        }
+      }, document.getElementById('redoc-container'))
+    </script>
   </body>
 </html>
