@@ -1,11 +1,15 @@
 openapi: '3.0.3'
 info:
-  title: 'LEDES API Example'
+  title: 'LEDES API - Draft Example'
   termsOfService: https://ledes.org/terms-of-use/
   description: |
-    This is the Open API specification for the [ledes.org](https://ledes.org/ledes-api/).
+    This is an illustration of how the OpenAPI specification could be used to document the LEDES API for the [ledes.org](https://ledes.org/ledes-api/).
+    It is not complete and field names and enum values have been changed to conform to a different lettercase convention (rather than CamelCase).
+
+    The public githib repo for this site is available on [https://github.com/Apperio/ledes-api-docs](https://github.com/Apperio/ledes-api-docs) where you 
+    can see the [yaml](https://github.com/Apperio/ledes-api-docs/blob/master/openapi.yml) file that was used to generate this page.
   contact:
-    email: loc@ledes.org
+    email: loc@ledes.org, stephen@apperio.com
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -18,7 +22,17 @@ paths:
     post:
       summary: Submit an invoice
       requestBody:
-        description: Submit an invoice.
+        description: |
+          Send an invoice using one of the existing LEDES file formats (ie. LEDES XML) as a file.
+
+          This is the main method to send an existing LEDES invoice file.
+          The LEDES file can be optionally encrypted.
+          NOTE: It is already required that all data be encrypted in transit, so this would be additional encryption
+          of the LEDES file, which would then require a mechanism for the receiving system to be able to unencrypt
+          the LEDES file. If encrypted, the encryption method is part of the system setup. Returns an invoiceID,
+          receivedDateTime, and errors (see response below). The invoiceID is used for subsequent API calls to send
+          an attachment for the invoice or to get the status of the invoice. The vendor for the invoice should be
+          identified by the authentication and checked against the vendor identified within the LEDES files.'
         required: true
         content:
           multipart/form-data:
@@ -110,7 +124,6 @@ paths:
           description: Not Found. Invoice could not be found.
 tags:
   - name: Invoices
-    description: 'Send an invoice using one of the existing LEDES file formats (ie. LEDES XML) as a file. This is the main method to send an existing LEDES invoice file. The LEDES file can be optionally encrypted. NOTE: It is already required that all data be encrypted in transit, so this would be additional encryption of the LEDES file, which would then require a mechanism for the receiving system to be able to unencrypt the LEDES file. If encrypted, the encryption method is part of the system setup. Returns an invoiceID, receivedDateTime, and errors (see response below). The invoiceID is used for subsequent API calls to send an attachment for the invoice or to get the status of the invoice. The vendor for the invoice should be identified by the authentication and checked against the vendor identified within the LEDES files.'
 components:
   schemas:
     invoice_get_response:
@@ -368,7 +381,3 @@ components:
       description: Description of the invoice.
       example:
       - 'Invoice for May 2020 for Matter 12345.'
-
-
-
-
