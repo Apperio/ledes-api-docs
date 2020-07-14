@@ -1,0 +1,17 @@
+{
+  "name": "apperio_api_docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "dependencies": {
+    "express": "^4.16.4",
+    "json-schema-generator": "^2.0.6",
+    "json-schema-ref-parser": "^6.0.1",
+    "yamljs": "^0.3.0"
+  }
+}
