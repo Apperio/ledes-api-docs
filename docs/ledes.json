@@ -1,492 +1,491 @@
 {
    "openapi": "3.0.3",
    "info": {
-      "title": "LEDES API Example",
-      "termsOfService": "https://ledes.org/terms-of-use/",
-      "description": "This is the Open API specification for the [ledes.org](https://ledes.org/ledes-api/).\n",
-      "contact": {
-         "email": "loc@ledes.org"
-      },
-      "license": {
-         "name": "Apache 2.0",
-         "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-      }
+     "title": "LEDES API - Draft Example",
+     "termsOfService": "https://ledes.org/terms-of-use/",
+     "description": "This is an illustration of how the OpenAPI specification could be used to document the LEDES API for the [ledes.org](https://ledes.org/ledes-api/).\nIt is not complete and field names and enum values have been changed to conform to a different lettercase convention (rather than CamelCase).\n\nThe public githib repo for this site is available on [https://github.com/Apperio/ledes-api-docs](https://github.com/Apperio/ledes-api-docs) where you \ncan see the [yaml](https://github.com/Apperio/ledes-api-docs/blob/master/openapi.yml) file that was used to generate this page.\n",
+     "contact": {
+       "email": "loc@ledes.org, stephen@apperio.com"
+     },
+     "license": {
+       "name": "Apache 2.0",
+       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+     }
    },
    "servers": [
-      {
-         "url": "https://api.example.com/api/v1/"
-      }
+     {
+       "url": "https://api.example.com/api/v1/"
+     }
    ],
    "paths": {
-      "/invoices": {
-         "tag": "Invoices",
-         "post": {
-            "summary": "Submit an invoice",
-            "requestBody": {
-               "description": "Submit an invoice.",
-               "required": true,
-               "content": {
-                  "multipart/form-data": {
-                     "schema": {
-                        "type": "object",
-                        "properties": {
-                           "invoice": {
-                              "$ref": "#/components/schemas/invoice_post"
-                           },
-                           "ledesfile": {
-                              "type": "string",
-                              "format": "binary"
-                           }
-                        },
-                        "encoding": {
-                           "ledesfile": {
-                              "contentType": "text/plain, text/csv, application/xml"
-                           }
-                        }
-                     }
-                  }
+     "/invoices": {
+       "tag": "Invoices",
+       "post": {
+         "summary": "Submit an invoice",
+         "requestBody": {
+           "description": "Send an invoice using one of the existing LEDES file formats (ie. LEDES XML) as a file.\n\nThis is the main method to send an existing LEDES invoice file.\nThe LEDES file can be optionally encrypted.\nNOTE: It is already required that all data be encrypted in transit, so this would be additional encryption\nof the LEDES file, which would then require a mechanism for the receiving system to be able to unencrypt\nthe LEDES file. If encrypted, the encryption method is part of the system setup. Returns an invoiceID,\nreceivedDateTime, and errors (see response below). The invoiceID is used for subsequent API calls to send\nan attachment for the invoice or to get the status of the invoice. The vendor for the invoice should be\nidentified by the authentication and checked against the vendor identified within the LEDES files.'\n",
+           "required": true,
+           "content": {
+             "multipart/form-data": {
+               "schema": {
+                 "type": "object",
+                 "properties": {
+                   "invoice": {
+                     "$ref": "#/components/schemas/invoice_post"
+                   },
+                   "ledesfile": {
+                     "type": "string",
+                     "format": "binary"
+                   }
+                 },
+                 "encoding": {
+                   "ledesfile": {
+                     "contentType": "text/plain, text/csv, application/xml"
+                   }
+                 }
                }
-            },
-            "responses": {
-               "201": {
-                  "description": "Created",
-                  "content": {
-                     "application/json": {
-                        "schema": {
-                           "type": "object",
-                           "properties": {
-                              "invoiceid": {
-                                 "$ref": "#/components/schemas/invoiceid"
-                              },
-                              "received_time": {
-                                 "type": "string",
-                                 "description": "The time the invoice was received.",
-                                 "example": "2020-14-19T15:55:12-04:00"
-                              }
-                           }
-                        }
+             }
+           }
+         },
+         "responses": {
+           "201": {
+             "description": "Created",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "type": "object",
+                   "properties": {
+                     "invoiceid": {
+                       "$ref": "#/components/schemas/invoiceid"
+                     },
+                     "received_time": {
+                       "type": "string",
+                       "description": "The time the invoice was received.",
+                       "example": "2020-14-19T15:55:12-04:00"
                      }
-                  }
-               },
-               "202": {
-                  "description": "Accepted. Processing not completed yet.",
-                  "content": {
-                     "application/json": {
-                        "schema": {
-                           "type": "object",
-                           "properties": {
-                              "invoiceid": {
-                                 "$ref": "#/components/schemas/invoiceid"
-                              },
-                              "received_time": {
-                                 "type": "string",
-                                 "description": "The time the invoice was received.",
-                                 "example": "2020-14-19T15:55:12-04:00"
-                              }
-                           }
-                        }
-                     }
-                  }
-               },
-               "400": {
-                  "description": "Bad request",
-                  "content": {
-                     "application/json": {
-                        "schema": {
-                           "type": "object",
-                           "properties": {
-                              "invoiceid": {
-                                 "$ref": "#/components/schemas/invoiceid"
-                              },
-                              "received_time": {
-                                 "type": "string",
-                                 "description": "The time the invoice was received.",
-                                 "example": "2020-14-19T15:55:12-04:00"
-                              },
-                              "errors": {
-                                 "type": "array",
-                                 "items": {
-                                    "type": "object",
-                                    "properties": {
-                                       "error": {
-                                          "type": "string",
-                                          "example": "Invalid invoice_type : LEDES99B"
-                                       }
-                                    }
-                                 }
-                              }
-                           }
-                        }
-                     }
-                  }
-               },
-               "403": {
-                  "description": "User does not have permission to post invoices."
-               },
-               "415": {
-                  "description": "Unsupported media type. The server does not support this LEDES\nfile standard."
-               },
-               "500": {
-                  "description": "Internal server error."
+                   }
+                 }
                }
-            }
+             }
+           },
+           "202": {
+             "description": "Accepted. Processing not completed yet.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "type": "object",
+                   "properties": {
+                     "invoiceid": {
+                       "$ref": "#/components/schemas/invoiceid"
+                     },
+                     "received_time": {
+                       "type": "string",
+                       "description": "The time the invoice was received.",
+                       "example": "2020-14-19T15:55:12-04:00"
+                     }
+                   }
+                 }
+               }
+             }
+           },
+           "400": {
+             "description": "Bad request",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "type": "object",
+                   "properties": {
+                     "invoiceid": {
+                       "$ref": "#/components/schemas/invoiceid"
+                     },
+                     "received_time": {
+                       "type": "string",
+                       "description": "The time the invoice was received.",
+                       "example": "2020-14-19T15:55:12-04:00"
+                     },
+                     "errors": {
+                       "type": "array",
+                       "items": {
+                         "type": "object",
+                         "properties": {
+                           "error": {
+                             "type": "string",
+                             "example": "Invalid invoice_type : LEDES99B"
+                           }
+                         }
+                       }
+                     }
+                   }
+                 }
+               }
+             }
+           },
+           "403": {
+             "description": "User does not have permission to post invoices."
+           },
+           "415": {
+             "description": "Unsupported media type. The server does not support this LEDES file standard."
+           },
+           "500": {
+             "description": "Internal server error."
+           }
          }
-      },
-      "/invoices/{invoiceid}": {
-         "tag": "Invoices",
-         "get": {
-            "summary": "Get an invoice",
-            "description": "Returns a single invoice with status",
-            "parameters": [
-               {
-                  "in": "path",
-                  "name": "invoiceid",
-                  "schema": {
-                     "$ref": "#/components/schemas/invoiceid"
-                  }
+       }
+     },
+     "/invoices/{invoiceid}": {
+       "tag": "Invoices",
+       "get": {
+         "summary": "Get an invoice",
+         "description": "Returns a single invoice with status",
+         "parameters": [
+           {
+             "in": "path",
+             "name": "invoiceid",
+             "schema": {
+               "$ref": "#/components/schemas/invoiceid"
+             }
+           }
+         ],
+         "responses": {
+           "200": {
+             "description": "An invoice",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/invoice_get_response"
+                 }
                }
-            ],
-            "responses": {
-               "200": {
-                  "description": "An invoice",
-                  "content": {
-                     "application/json": {
-                        "schema": {
-                           "$ref": "#/components/schemas/invoice_get_response"
-                        }
-                     }
-                  }
-               },
-               "404": {
-                  "description": "Not Found. Invoice could not be found."
-               }
-            }
+             }
+           },
+           "404": {
+             "description": "Not Found. Invoice could not be found."
+           }
          }
-      }
+       }
+     }
    },
    "tags": [
-      {
-         "name": "Invoices",
-         "description": "Send an invoice using one of the existing LEDES file formats (ie. LEDES XML) as a file. This is the main method to send an existing LEDES invoice file. The LEDES file can be optionally encrypted. NOTE: It is already required that all data be encrypted in transit, so this would be additional encryption of the LEDES file, which would then require a mechanism for the receiving system to be able to unencrypt the LEDES file. If encrypted, the encryption method is part of the system setup. Returns an invoiceID, receivedDateTime, and errors (see response below). The invoiceID is used for subsequent API calls to send an attachment for the invoice or to get the status of the invoice. The vendor for the invoice should be identified by the authentication and checked against the vendor identified within the LEDES files."
-      }
+     {
+       "name": "Invoices"
+     }
    ],
    "components": {
-      "schemas": {
-         "invoice_get_response": {
-            "properties": {
-               "invoiceid": {
-                  "$ref": "#/components/schemas/invoiceid"
-               },
-               "vendor_invoice_number": {
-                  "type": "string",
-                  "description": "The original invoice number specified by the sending system."
-               },
-               "invoice_status": {
-                  "$ref": "#/components/schemas/invoice_status"
-               },
-               "invoice_status_time": {
-                  "type": "string",
-                  "description": "the time the status was set",
-                  "example": "2020-04-19T15:55:12-04:00"
-               },
-               "rejection_note": {
-                  "type": "string",
-                  "description": "When an invoice is rejected, this can be used to describe the overall reason for the rejection. Note that the invoiceErrors element holds a more detailed description of each individual error and this element should duplicate that information.",
-                  "example": "Too many billing guideline violaions."
-               },
-               "original_total": {
-                  "type": "string",
-                  "description": "The original invoice total amount from the vendor. This should be a string of numbers, followed by a decimal place, followed by two numbers. This should always be included unless the LEDES files could not be parsed.",
-                  "example": "55435.00"
-               },
-               "original_currency": {
-                  "type": "string",
-                  "description": "The currency for the original invoice total amount from the vendor. This should always be included unless the LEDES files could not be parsed. The three-character ISO-4217 currency code.",
-                  "example": "USD"
-               },
-               "approved_total": {
-                  "type": "string",
-                  "description": "The invoice total amount approved by the client. For jurisdictions where clients can pay less than the originalTotal this is the amount the client plans to pay or has paid. The invoiceAdjustments section below should document the adjustments the client is imposing on the invoice. If the status is Paid, this should also match the invoicePayment data below.",
-                  "example": "35435.00"
-               },
-               "approved_currency": {
-                  "type": "string",
-                  "description": "The currency for the approved_total. The three-character ISO-4217 currency code.",
-                  "example": "USD"
-               },
-               "invoice_errors": {
-                  "$ref": "#/components/schemas/invoice_errors"
-               },
-               "adjustments": {
-                  "$ref": "#/components/schemas/invoice_adjustments"
-               },
-               "payments": {
-                  "$ref": "#/components/schemas/invoice_payments"
-               }
-            }
-         },
-         "invoice_post": {
-            "properties": {
-               "ledes_format": {
-                  "$ref": "#/components/schemas/ledes_format"
-               },
-               "encrypted": {
-                  "$ref": "#/components/schemas/encrypted"
-               },
-               "ledes_filename": {
-                  "$ref": "#/components/schemas/ledes_filename"
-               },
-               "ledes_file_media_type": {
-                  "$ref": "#/components/schemas/ledes_file_media_type"
-               },
-               "invoice_type": {
-                  "$ref": "#/components/schemas/invoice_type"
-               },
-               "related_invoice_id": {
-                  "$ref": "#/components/schemas/related_invoice_id"
-               },
-               "comment": {
-                  "$ref": "#/components/schemas/comment"
-               }
-            },
-            "required": [
-               "ledes_format",
-               "encrypted",
-               "ledes_filename",
-               "ledes_file_media_type",
-               "invoice_type"
-            ]
-         },
-         "invoiceid": {
-            "type": "string",
-            "description": "The invoice id",
-            "example": "7846859"
-         },
-         "ledes_format": {
-            "type": "string",
-            "description": "The LEDES invoice file format",
-            "enum": [
-               "LEDES98B",
-               "LEDES98BI",
-               "LEDES98BIV2",
-               "LEDES2000",
-               "LEDESXML20",
-               "LEDESXML21"
-            ],
-            "example": "LEDES98BI"
-         },
-         "encrypted": {
-            "type": "boolean",
-            "description": "Whether the ledesfile is encrypted or not.",
-            "example": "True"
-         },
-         "ledes_filename": {
-            "type": "string",
-            "example": "Invoice1234.234.xml",
-            "description": "The name of the LEDES file. This does not need to be unique or\nbe the invoice number, which is a common filename for LEDES file. It can\nsimply be the filename of the LEDES file on the sending system side for\nreference purposes. This should be the filename without mime type (ie. INV-2019-123).\nThis should not include any network or folder path information. Receiving\nsystems can set a limit for the length of filenames with the appropriate\nerror message described below."
-         },
-         "ledes_file_media_type": {
-            "type": "string",
-            "description": "The LEDES invoice file format",
-            "enum": [
-               "text/plain",
-               "text/csv"
-            ],
-            "example": [
-               "text/csv"
-            ]
-         },
-         "invoice_type": {
-            "type": "string",
-            "description": "The type of invoice being submitted.",
-            "enum": [
-               "INVOICE",
-               "ACCRUAL",
-               "SHADOW",
-               "RESUBMIT",
-               "APPEAL",
-               "REPLACEMENT"
-            ],
-            "example": [
-               "INVOICE"
-            ]
-         },
-         "related_invoice_id": {
-            "type": "integer",
-            "description": "The Invoice ID of a related invoice that the submitted invoice\nis associated. For example, if an invoice is rejected and then a new invoice\nis submitted with adjustments or as an appeal, this would be the invoice\nID of the originally submitted invoice. This is required for invoiceTypes\nof resubmit, appeal and replacement.",
-            "example": 58912746
-         },
-         "invoice_status": {
-            "type": "string",
-            "description": "The status of the invoice",
-            "enum": [
-               "RECEIVED",
-               "FILE_ERROR",
-               "PENDING_CLIENT",
-               "PENDING_TAX_AUTHORITY",
-               "PENDING_VENDOR",
-               "DELIVERED_TO_CLIENT",
-               "REJECTED",
-               "APPROVED",
-               "SENT_TO_AP",
-               "PAID"
-            ],
-            "example": [
-               "REJECTED"
-            ]
-         },
-         "invoice_errors": {
-            "type": "array",
-            "items": {
-               "type": "object",
-               "properties": {
-                  "error_type": {
-                     "type": "string",
-                     "enum": [
-                        "FILE_STRUCTURE",
-                        "MISSING_FIELD",
-                        "BAD_FILE_DATA",
-                        "INVOICE_LEVEL_ERROR",
-                        "LINE_ITEM_ERROR",
-                        "AUDIT_ERROR",
-                        "AFA_ERROR"
-                     ],
-                     "example": "LINE_ITEM_ERROR"
-                  },
-                  "datetime": {
-                     "type": "string",
-                     "description": "the time the status was set",
-                     "example": "2020-04-19T15:55:12-04:00"
-                  },
-                  "error_code": {
-                     "type": "string",
-                     "example": "BD214"
-                  },
-                  "error_name": {
-                     "type": "string",
-                     "example": "Invalid Timekeeper"
-                  },
-                  "error_description": {
-                     "type": "string",
-                     "example": "Line item #6 has an invalid timekeeper ID: 12345."
-                  },
-                  "line_item": {
-                     "$ref": "#/components/schemas/line_item"
-                  }
-               }
-            }
-         },
-         "invoice_adjustments": {
-            "type": "array",
-            "items": {
-               "type": "object",
-               "properties": {
-                  "adjustment_type": {
-                     "type": "string",
-                     "enum": [
-                        "INVOICE_LEVEL_ADJUSTMENT",
-                        "LINE_ITEM_ADJUSTMENT"
-                     ],
-                     "example": "LINE_ITEM_ADJUSTMENT"
-                  },
-                  "datetime": {
-                     "type": "string",
-                     "description": "The date and time the adjustment was identified.",
-                     "example": "2020-04-19T15:55:12-04:00"
-                  },
-                  "adjustment_amount": {
-                     "type": "string",
-                     "example": "210.05"
-                  },
-                  "adjustment_currency": {
-                     "type": "string",
-                     "example": "USD"
-                  },
-                  "adjustment_reason": {
-                     "type": "string",
-                     "example": "Block billing guideline violation."
-                  },
-                  "original_line_item": {
-                     "$ref": "#/components/schemas/line_item"
-                  },
-                  "adjusted_line_item": {
-                     "$ref": "#/components/schemas/line_item"
-                  }
-               }
-            }
-         },
-         "line_item": {
-            "properties": {
-               "line_item_ref": {
-                  "type": "integer",
-                  "description": "This is the line item number from the original LEDES file\nand should be set if possible. This is the file_item_nbr field in LEDES XML\nor the LINE_ITEM_NUMBER field in LEDES98B/BI. If the receiving system hasn’t\nmaintained the original LEDES line number reference, then a value of -9999\nshould be returned and the rest of the line item fields should be set for the\ntime & billing application to understand which line item is being referenced.\nThis property is not used when specifying a line item adjustment in the case of\nInvoiceAdjustment.adjustedLineItem since the reference to the line item is specified\nwith InvoiceAdjustment.originalLineItem. Read only.",
-                  "example": 5
-               },
-               "line_item_type": {
-                  "type": "string",
-                  "enum": [
-                     "FEE",
-                     "EXPENSE"
-                  ],
-                  "example": [
-                     "FEE"
-                  ]
-               }
-            }
-         },
-         "invoice_payments": {
-            "type": "array",
-            "items": {
-               "type": "object",
-               "properties": {
-                  "payment_type": {
-                     "type": "string",
-                     "enum": [
-                        "CHECK",
-                        "WIRE",
-                        "ACH",
-                        "CREDIT_CARD"
-                     ],
-                     "example": "WIRE"
-                  },
-                  "datetime": {
-                     "type": "string",
-                     "description": "The date and time of the payment.",
-                     "example": "2020-04-19T15:55:12-04:00"
-                  },
-                  "payment_amount": {
-                     "type": "string",
-                     "example": "25000.00"
-                  },
-                  "payment_currency": {
-                     "type": "string",
-                     "example": "USD"
-                  },
-                  "payment_reference": {
-                     "type": "string",
-                     "description": "The reference information for the payment, for example, the check number. For Wire and ACH this should be the confirmation number.",
-                     "example": "3384455"
-                  },
-                  "payee": {
-                     "type": "string",
-                     "description": "The entity to whom the payment was made.",
-                     "example": "Moose and Squirrel."
-                  },
-                  "paid_to_account": {
-                     "type": "string",
-                     "description": "The account to which the payment was made for paymentType’s of Wire, ACH, and Credit.",
-                     "example": "55778674"
-                  }
-               }
-            }
-         },
-         "comment": {
-            "type": "string",
-            "description": "Description of the invoice.",
-            "example": [
-               "Invoice for May 2020 for Matter 12345."
-            ]
+     "schemas": {
+       "invoice_get_response": {
+         "properties": {
+           "invoiceid": {
+             "$ref": "#/components/schemas/invoiceid"
+           },
+           "vendor_invoice_number": {
+             "type": "string",
+             "description": "The original invoice number specified by the sending system."
+           },
+           "invoice_status": {
+             "$ref": "#/components/schemas/invoice_status"
+           },
+           "invoice_status_time": {
+             "type": "string",
+             "description": "the time the status was set",
+             "example": "2020-04-19T15:55:12-04:00"
+           },
+           "rejection_note": {
+             "type": "string",
+             "description": "When an invoice is rejected, this can be used to describe the overall reason for the rejection. Note that the invoiceErrors element holds a more detailed description of each individual error and this element should duplicate that information.",
+             "example": "Too many billing guideline violaions."
+           },
+           "original_total": {
+             "type": "string",
+             "description": "The original invoice total amount from the vendor. This should be a string of numbers, followed by a decimal place, followed by two numbers. This should always be included unless the LEDES files could not be parsed.",
+             "example": "55435.00"
+           },
+           "original_currency": {
+             "type": "string",
+             "description": "The currency for the original invoice total amount from the vendor. This should always be included unless the LEDES files could not be parsed. The three-character ISO-4217 currency code.",
+             "example": "USD"
+           },
+           "approved_total": {
+             "type": "string",
+             "description": "The invoice total amount approved by the client. For jurisdictions where clients can pay less than the originalTotal this is the amount the client plans to pay or has paid. The invoiceAdjustments section below should document the adjustments the client is imposing on the invoice. If the status is Paid, this should also match the invoicePayment data below.",
+             "example": "35435.00"
+           },
+           "approved_currency": {
+             "type": "string",
+             "description": "The currency for the approved_total. The three-character ISO-4217 currency code.",
+             "example": "USD"
+           },
+           "invoice_errors": {
+             "$ref": "#/components/schemas/invoice_errors"
+           },
+           "adjustments": {
+             "$ref": "#/components/schemas/invoice_adjustments"
+           },
+           "payments": {
+             "$ref": "#/components/schemas/invoice_payments"
+           }
          }
-      }
+       },
+       "invoice_post": {
+         "properties": {
+           "ledes_format": {
+             "$ref": "#/components/schemas/ledes_format"
+           },
+           "encrypted": {
+             "$ref": "#/components/schemas/encrypted"
+           },
+           "ledes_filename": {
+             "$ref": "#/components/schemas/ledes_filename"
+           },
+           "ledes_file_media_type": {
+             "$ref": "#/components/schemas/ledes_file_media_type"
+           },
+           "invoice_type": {
+             "$ref": "#/components/schemas/invoice_type"
+           },
+           "related_invoice_id": {
+             "$ref": "#/components/schemas/related_invoice_id"
+           },
+           "comment": {
+             "$ref": "#/components/schemas/comment"
+           }
+         },
+         "required": [
+           "ledes_format",
+           "encrypted",
+           "ledes_filename",
+           "ledes_file_media_type",
+           "invoice_type"
+         ]
+       },
+       "invoiceid": {
+         "type": "string",
+         "description": "The invoice id",
+         "example": "7846859"
+       },
+       "ledes_format": {
+         "type": "string",
+         "description": "The LEDES invoice file format",
+         "enum": [
+           "LEDES98B",
+           "LEDES98BI",
+           "LEDES98BIV2",
+           "LEDES2000",
+           "LEDESXML20",
+           "LEDESXML21"
+         ],
+         "example": "LEDES98BI"
+       },
+       "encrypted": {
+         "type": "boolean",
+         "description": "Whether the ledesfile is encrypted or not.",
+         "example": "True"
+       },
+       "ledes_filename": {
+         "type": "string",
+         "example": "Invoice1234.234.xml",
+         "description": "The name of the LEDES file. This does not need to be unique or be the invoice number, which is a common filename for LEDES file. It can simply be the filename of the LEDES file on the sending system side for reference purposes. This should be the filename without mime type (ie. INV-2019-123). This should not include any network or folder path information. Receiving systems can set a limit for the length of filenames with the appropriate error message described below."
+       },
+       "ledes_file_media_type": {
+         "type": "string",
+         "description": "The LEDES invoice file format",
+         "enum": [
+           "text/plain",
+           "text/csv"
+         ],
+         "example": [
+           "text/csv"
+         ]
+       },
+       "invoice_type": {
+         "type": "string",
+         "description": "The type of invoice being submitted.",
+         "enum": [
+           "INVOICE",
+           "ACCRUAL",
+           "SHADOW",
+           "RESUBMIT",
+           "APPEAL",
+           "REPLACEMENT"
+         ],
+         "example": [
+           "INVOICE"
+         ]
+       },
+       "related_invoice_id": {
+         "type": "integer",
+         "description": "The Invoice ID of a related invoice that the submitted invoice is associated. For example, if an invoice is rejected and then a new invoice is submitted with adjustments or as an appeal, this would be the invoice ID of the originally submitted invoice. This is required for invoiceTypes of resubmit, appeal and replacement.",
+         "example": 58912746
+       },
+       "invoice_status": {
+         "type": "string",
+         "description": "The status of the invoice",
+         "enum": [
+           "RECEIVED",
+           "FILE_ERROR",
+           "PENDING_CLIENT",
+           "PENDING_TAX_AUTHORITY",
+           "PENDING_VENDOR",
+           "DELIVERED_TO_CLIENT",
+           "REJECTED",
+           "APPROVED",
+           "SENT_TO_AP",
+           "PAID"
+         ],
+         "example": [
+           "REJECTED"
+         ]
+       },
+       "invoice_errors": {
+         "type": "array",
+         "items": {
+           "type": "object",
+           "properties": {
+             "error_type": {
+               "type": "string",
+               "enum": [
+                 "FILE_STRUCTURE",
+                 "MISSING_FIELD",
+                 "BAD_FILE_DATA",
+                 "INVOICE_LEVEL_ERROR",
+                 "LINE_ITEM_ERROR",
+                 "AUDIT_ERROR",
+                 "AFA_ERROR"
+               ],
+               "example": "LINE_ITEM_ERROR"
+             },
+             "datetime": {
+               "type": "string",
+               "description": "the time the status was set",
+               "example": "2020-04-19T15:55:12-04:00"
+             },
+             "error_code": {
+               "type": "string",
+               "example": "BD214"
+             },
+             "error_name": {
+               "type": "string",
+               "example": "Invalid Timekeeper"
+             },
+             "error_description": {
+               "type": "string",
+               "example": "Line item #6 has an invalid timekeeper ID: 12345."
+             },
+             "line_item": {
+               "$ref": "#/components/schemas/line_item"
+             }
+           }
+         }
+       },
+       "invoice_adjustments": {
+         "type": "array",
+         "items": {
+           "type": "object",
+           "properties": {
+             "adjustment_type": {
+               "type": "string",
+               "enum": [
+                 "INVOICE_LEVEL_ADJUSTMENT",
+                 "LINE_ITEM_ADJUSTMENT"
+               ],
+               "example": "LINE_ITEM_ADJUSTMENT"
+             },
+             "datetime": {
+               "type": "string",
+               "description": "The date and time the adjustment was identified.",
+               "example": "2020-04-19T15:55:12-04:00"
+             },
+             "adjustment_amount": {
+               "type": "string",
+               "example": "210.05"
+             },
+             "adjustment_currency": {
+               "type": "string",
+               "example": "USD"
+             },
+             "adjustment_reason": {
+               "type": "string",
+               "example": "Block billing guideline violation."
+             },
+             "original_line_item": {
+               "$ref": "#/components/schemas/line_item"
+             },
+             "adjusted_line_item": {
+               "$ref": "#/components/schemas/line_item"
+             }
+           }
+         }
+       },
+       "line_item": {
+         "properties": {
+           "line_item_ref": {
+             "type": "integer",
+             "description": "This is the line item number from the original LEDES file  and should be set if possible. This is the file_item_nbr field in LEDES XML  or the LINE_ITEM_NUMBER field in LEDES98B/BI. If the receiving system hasn’t  maintained the original LEDES line number reference, then a value of -9999  should be returned and the rest of the line item fields should be set for the  time & billing application to understand which line item is being referenced.  This property is not used when specifying a line item adjustment in the case of  InvoiceAdjustment.adjustedLineItem since the reference to the line item is specified  with InvoiceAdjustment.originalLineItem. Read only.",
+             "example": 5
+           },
+           "line_item_type": {
+             "type": "string",
+             "enum": [
+               "FEE",
+               "EXPENSE"
+             ],
+             "example": [
+               "FEE"
+             ]
+           }
+         }
+       },
+       "invoice_payments": {
+         "type": "array",
+         "items": {
+           "type": "object",
+           "properties": {
+             "payment_type": {
+               "type": "string",
+               "enum": [
+                 "CHECK",
+                 "WIRE",
+                 "ACH",
+                 "CREDIT_CARD"
+               ],
+               "example": "WIRE"
+             },
+             "datetime": {
+               "type": "string",
+               "description": "The date and time of the payment.",
+               "example": "2020-04-19T15:55:12-04:00"
+             },
+             "payment_amount": {
+               "type": "string",
+               "example": "25000.00"
+             },
+             "payment_currency": {
+               "type": "string",
+               "example": "USD"
+             },
+             "payment_reference": {
+               "type": "string",
+               "description": "The reference information for the payment, for example, the check number. For Wire and ACH this should be the confirmation number.",
+               "example": "3384455"
+             },
+             "payee": {
+               "type": "string",
+               "description": "The entity to whom the payment was made.",
+               "example": "Moose and Squirrel."
+             },
+             "paid_to_account": {
+               "type": "string",
+               "description": "The account to which the payment was made for paymentType’s of Wire, ACH, and Credit.",
+               "example": "55778674"
+             }
+           }
+         }
+       },
+       "comment": {
+         "type": "string",
+         "description": "Description of the invoice.",
+         "example": [
+           "Invoice for May 2020 for Matter 12345."
+         ]
+       }
+     }
    }
-}
+ }
