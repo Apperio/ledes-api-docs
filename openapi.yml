@@ -1,6 +1,6 @@
 openapi: '3.0.3'
 info:
-  title: 'LEDES API - Draft Example'
+  title: 'LEDES API (For illustration only)'
   termsOfService: https://ledes.org/terms-of-use/
   description: |
     This is an illustration of how the OpenAPI specification could be used to document the LEDES API for the [ledes.org](https://ledes.org/ledes-api/).
@@ -17,9 +17,9 @@ servers:
   - url: https://api.example.com/api/v1/
 paths:
   /invoices:
-    tag:
-      Invoices
     post:
+      tags:
+        - Invoices
       summary: Submit an invoice
       requestBody:
         description: |
@@ -47,6 +47,14 @@ paths:
               encoding:
                 ledesfile:
                   contentType: text/plain, text/csv, application/xml
+            example:
+              invoice:
+                ledes_format: LEDES98BIV2
+                encrypted: False
+                ledes_filename: Invoice1234.234.xml
+                ledes_file_media_type: 'text/csv'
+                invoice_type: INVOICE
+              ledesfile: '<binary>'
       responses:
         '201':
           description: Created
@@ -56,11 +64,17 @@ paths:
                 type: object
                 properties:
                   invoiceid:
-                    $ref: '#/components/schemas/invoiceid'
+                    $ref: '#/components/parameters/invoiceid'
                   received_time:
                     type: string
                     description: The time the invoice was received.
                     example: '2020-14-19T15:55:12-04:00'
+                  invoice_status:
+                    $ref: '#/components/schemas/invoice_status'
+                example:
+                  invoiceid: '4567'
+                  received_time: '2020-14-19T15:55:12-04:00'
+                  invoice_status: 'RECEIVED'
         '202':
           description: Accepted. Processing not completed yet.
           content:
@@ -69,11 +83,17 @@ paths:
                 type: object
                 properties:
                   invoiceid:
-                    $ref: '#/components/schemas/invoiceid'
+                    $ref: '#/components/parameters/invoiceid'
                   received_time:
                     type: string
                     description: The time the invoice was received.
                     example: '2020-14-19T15:55:12-04:00'
+                  invoice_status:
+                    $ref: '#/components/schemas/invoice_status'
+                example:
+                  invoiceid: '4567'
+                  received_time: '2020-14-19T15:55:12-04:00'
+                  invoice_status: 'RECEIVED'
         '400':
           description: Bad request
           content:
@@ -82,11 +102,13 @@ paths:
                 type: object
                 properties:
                   invoiceid:
-                    $ref: '#/components/schemas/invoiceid'
+                    $ref: '#/components/parameters/invoiceid'
                   received_time:
                     type: string
                     description: The time the invoice was received.
                     example: '2020-14-19T15:55:12-04:00'
+                  invoice_status:
+                    $ref: '#/components/schemas/invoice_status'
                   errors:
                     type: array
                     items:
@@ -103,68 +125,113 @@ paths:
         '500':
           description: Internal server error.
   /invoices/{invoiceid}:
-    tag:
-      Invoices
     get:
+      tags:
+        - Invoices
       summary: Get an invoice
       description: Returns a single invoice with status
       parameters:
         - in: path
           name: invoiceid
           schema:
-            $ref: '#/components/schemas/invoiceid'
+            $ref: '#/components/parameters/invoiceid'
       responses:
         '200':    # status code
-          description: An invoice
+          description: OK. Invoice found.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/invoice_get_response'
+                properties:
+                  invoiceid:
+                    $ref: '#/components/parameters/invoiceid'
+                  vendor_invoice_number:
+                    type: string
+                    description: The original invoice number specified by the sending system.
+                  invoice_status:
+                    $ref: '#/components/schemas/invoice_status'
+                  invoice_status_time:
+                    type: string
+                    description: The time the status was set in UTC using ISO 8601.
+                    example: '2020-04-19T15:55:12-04:00'
+                  rejection_note:
+                    type: string
+                    description: When an invoice is rejected, this can be used to describe the overall reason for the rejection. Note that the invoiceErrors element holds a more detailed description of each individual error and this element should duplicate that information.
+                    example: 'Too many billing guideline violaions.'
+                  original_total:
+                    type: string
+                    description: The original invoice total amount from the vendor. This should be a string of numbers, followed by a decimal place, followed by two numbers. This should always be included unless the LEDES files could not be parsed.
+                    example: '55435.00'
+                  original_currency:
+                    type: string
+                    description: The currency for the original invoice total amount from the vendor. This should always be included unless the LEDES files could not be parsed. The three-character ISO-4217 currency code.
+                    example: 'USD'
+                  approved_total:
+                    type: string
+                    description: The invoice total amount approved by the client. For jurisdictions where clients can pay less than the originalTotal this is the amount the client plans to pay or has paid. The invoiceAdjustments section below should document the adjustments the client is imposing on the invoice. If the status is Paid, this should also match the invoicePayment data below.
+                    example: '35435.00'
+                  approved_currency:
+                    type: string
+                    description: The currency for the approved_total. The three-character ISO-4217 currency code.
+                    example: 'USD'
+                  invoice_errors:
+                    $ref: '#/components/schemas/invoice_errors'
+                  adjustments:
+                    $ref: '#/components/schemas/invoice_adjustments'
+                  payments:
+                    $ref: '#/components/schemas/invoice_payments'
         '404':
-          description: Not Found. Invoice could not be found.
+          description: 'Not found. No invoice with that id.'
+
+  /accruals/{law_firm_matter_id}:
+    post:
+      tags:
+        - Accruals
+      summary: Post accruals data for one matter
+      description: Proposal
+      parameters:
+        - in: path
+          name: law_firm_matter_id
+          schema:
+            $ref: '#/components/parameters/law_firm_matter_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accrual_currency:
+                  $ref: '#/components/schemas/accrual_currency'
+                accrual_total:
+                  $ref: '#/components/schemas/accrual_total'
+                fee_accrual_total:
+                  $ref: '#/components/schemas/fee_accrual_total'
+                expense_accrual_total:
+                  $ref: '#/components/schemas/expense_accrual_total'
+                monthly_accrual_totals:
+                  type: array
+                  description: Optional accruals totals broken down by calendar month.
+                  items:
+                    $ref: '#/components/schemas/monthly_accrual_total'
+                line_items:
+                  type: array
+                  description: Optional individual line item detail for expenses and fees accruals on this matter.
+                  items:
+                    $ref: '#/components/schemas/accrual_line_item'
+              example:
+                $ref: '#/components/examples/accruals'
+              required: [accrual_currency, accrual_total]
+        responses:
+          '200':    # status code
+            description: Accrual updated correctly
+          '404':
+            description: Not Found. Matter could not be found.
 tags:
   - name: Invoices
+    description: Manage invoice data.
+  - name: Accruals
+    description: Manage accrual data; fees and expenses that have been recorded but not yet invoiced.
 components:
   schemas:
-    invoice_get_response:
-      properties:
-        invoiceid:
-          $ref: '#/components/schemas/invoiceid'
-        vendor_invoice_number:
-          type: string
-          description: The original invoice number specified by the sending system.
-        invoice_status:
-          $ref: '#/components/schemas/invoice_status'
-        invoice_status_time:
-          type: string
-          description: the time the status was set
-          example: '2020-04-19T15:55:12-04:00'
-        rejection_note:
-          type: string
-          description: When an invoice is rejected, this can be used to describe the overall reason for the rejection. Note that the invoiceErrors element holds a more detailed description of each individual error and this element should duplicate that information.
-          example: 'Too many billing guideline violaions.'
-        original_total:
-          type: string
-          description: The original invoice total amount from the vendor. This should be a string of numbers, followed by a decimal place, followed by two numbers. This should always be included unless the LEDES files could not be parsed.
-          example: '55435.00'
-        original_currency:
-          type: string
-          description: The currency for the original invoice total amount from the vendor. This should always be included unless the LEDES files could not be parsed. The three-character ISO-4217 currency code.
-          example: 'USD'
-        approved_total:
-          type: string
-          description: The invoice total amount approved by the client. For jurisdictions where clients can pay less than the originalTotal this is the amount the client plans to pay or has paid. The invoiceAdjustments section below should document the adjustments the client is imposing on the invoice. If the status is Paid, this should also match the invoicePayment data below.
-          example: '35435.00'
-        approved_currency:
-          type: string
-          description: The currency for the approved_total. The three-character ISO-4217 currency code.
-          example: 'USD'
-        invoice_errors:
-          $ref: '#/components/schemas/invoice_errors'
-        adjustments:
-          $ref: '#/components/schemas/invoice_adjustments'
-        payments:
-          $ref: '#/components/schemas/invoice_payments'
     invoice_post:
       properties:
         ledes_format:
@@ -187,10 +254,92 @@ components:
       - ledes_filename
       - ledes_file_media_type
       - invoice_type
-    invoiceid:
+    accrual_currency:
       type: string
-      description: The invoice id
-      example: '7846859'
+      description: The currency for these accruals. The three-character ISO-4217 currency code.
+    accrual_total:
+      type: string
+      description: The total accruals. This should be a string of numbers, followed by a decimal place, followed by two or four numbers depending on exponent (number of minor units) in the currency.
+    fee_accrual_total:
+      type: string
+      description: The total of fees accrued. This should be a string of numbers, followed by a decimal place, followed by two or four numbers depending on exponent (number of minor units) in the currency.
+    expense_accrual_total:
+      type: string
+      description: The total expenses accrued. This should be a string of numbers, followed by a decimal place, followed by two or four numbers depending on exponent (number of minor units) in the currency.
+    monthly_accrual_total:
+      type: object
+      properties:
+        month:
+          type: string
+          description: Calendar month in YYYYMM format.
+        accrual_currency:
+          $ref: '#/components/schemas/accrual_currency'
+        accrual_total:
+          $ref: '#/components/schemas/accrual_total'
+        fee_accrual_total:
+          $ref: '#/components/schemas/fee_accrual_total'
+        expense_accrual_total:
+          $ref: '#/components/schemas/expense_accrual_total'
+      required:
+       - month
+       - accrual_currency
+       - accrual_total
+    accrual_line_item:
+      type: object
+      properties:
+        line_item_number:
+          type: string
+          description: Unique identifier for this line item within the law firm.
+          example: '181632'
+        line_item_type:
+          type: string
+          description: The type of line item. E - Expense. F - Fee.
+          enum: [E , F]
+        line_item_unit_cost:
+          type: string
+          description: The standard (i.e., undiscounted) unit cost, before taxes, of the line item. For fees, this would be the hourly rate. For expenses, this would be the cost per unit.
+          example: 260.00
+        line_item_number_of_units:
+          type: string
+          description: The number of units billed on this line item. For fee items, this is the number of hours being billed. For expense items, this is the number of items being expensed.
+          example: 1.75
+        line_item_adjustment_amount:
+          type: string
+          description: The numerical value of any adjustment applied to this line item. A positive value indicates a premium, a negative value indicates a discount. A null ("") or zero ("0") value indicates no adjustment.
+          example: 0
+        line_item_total:
+          type: string
+          description: The numerical value of this line item. This must be (line_item_unit_cost * line_item_number_of_units) + line_item_adjustment_amount. A null value ("") would be an error.
+          example: 100.00
+        line_item_date:
+          type: string
+          description: The date the fees/expenses were incurred, in YYYYMMDD format.
+          example: '20191127'
+        line_item_description:
+          type: string
+          description: Free form description of this line item.
+          example: 'abc'
+        line_item_currency:
+          type: string
+          description: The three-character ISO-4217 currency code for this line item.
+          example: 'USD'
+        timekeeper_id:
+          type: string
+          description: A unique identifier within the law firm for the timekeeper for this line entry.
+          example: '1835'
+        timekeeper_first_name:
+          type: string
+          description: The first name of a timekeeper.
+          example: 'Robert'
+        timekeeper_last_name:
+          type: string
+          description: The last name of a timekeeper.
+          example: 'Amsley'
+        timekeeper_classsification:
+          type: string
+          description: The staff classification of a timekeeper.  A full list of the codes to use can be found in the LEDES Revised Timekeeper Classifications Reference Document available on LEDES.org.
+          example: 'abc'
+      required: [line_item_number, line_item_type, line_item_total, line_item_date, line_item_description, line_item_unit_cost, line_item_number_of_units]
     ledes_format:
       type: string
       description: The LEDES invoice file format
@@ -258,8 +407,7 @@ components:
       - APPROVED
       - SENT_TO_AP
       - PAID
-      example:
-      - REJECTED
+      example: 'RECEIVED'
     invoice_errors:
       type: array
       items:
@@ -278,8 +426,8 @@ components:
             example: "LINE_ITEM_ERROR"
           datetime:
             type: string
-            description: the time the status was set
-            example: '2020-04-19T15:55:12-04:00'
+            description: The date and time of the error represented as an offest from UTC using ISO 8601.
+            example: '2020-04-19T15:55:12Z'
           error_code:
             type: string
             example: "BD214"
@@ -305,7 +453,7 @@ components:
           datetime:
             type: string
             description: The date and time the adjustment was identified.
-            example: '2020-04-19T15:55:12-04:00'
+            example: '2020-04-19T15:55:12+02:00'
           adjustment_amount:
             type: string
             example: "210.05"
@@ -322,7 +470,7 @@ components:
     line_item:
       properties:
         line_item_ref:
-          type: integer
+          type: string
           description: 'This is the line item number from the original LEDES file 
           and should be set if possible. This is the file_item_nbr field in LEDES XML 
           or the LINE_ITEM_NUMBER field in LEDES98B/BI. If the receiving system hasn’t 
@@ -335,11 +483,11 @@ components:
           example: 5
         line_item_type:
           type: string
+          description: The type of line item, either a fee (F) or an expense (E)
           enum:
-          - FEE
-          - EXPENSE
-          example:
-          - 'FEE'
+          - F
+          - E
+          example: 'F'
     invoice_payments:
       type: array
       items:
@@ -355,7 +503,7 @@ components:
             example: "WIRE"
           datetime:
             type: string
-            description: The date and time of the payment.
+            description: The date and time of the payment represented as an offest from UTC using ISO 8601.
             example: '2020-04-19T15:55:12-04:00'
           payment_amount:
             type: string
@@ -375,9 +523,89 @@ components:
             type: string
             description: The account to which the payment was made for paymentType’s of Wire, ACH, and Credit.
             example: '55778674'
-
     comment:
       type: string
       description: Description of the invoice.
       example:
       - 'Invoice for May 2020 for Matter 12345.'
+  parameters:
+    invoiceid:
+      type: string
+      description: The invoice id
+      example: '7846859'
+    law_firm_matter_id:
+      type: string
+      description: The law firm assigned matter code, unique within that law firm's system.
+      example: '873467'
+  examples:
+    accruals:
+      accrual_currency: 'USD'
+      accrual_total: '15600.00'
+      fee_accrual_total: '10000.00'
+      expense_accrual_total: '5600.00'
+      monthly_accrual_totals:
+        - month: '202001'
+          accrual_currency: 'USD'
+          accrual_total: '1600.00'
+          fee_accrual_total: '1000.00'
+          expense_accrual_total: '600.00'
+        - month: '202002'
+          accrual_currency: 'USD'
+          accrual_total: '14000.00'
+          fee_accrual_total: '9000.00'
+          expense_accrual_total: '5000.00'
+      line_items:
+        - line_item_number: 45294
+          line_item_type: 'F'
+          line_item_unit_cost: '500.00'
+          line_item_number_of_units: '2'
+          line_item_total: '1000.00'
+          line_item_currency: 'USD'
+          line_item_date: '20200115'
+          line_item_description: 'Reviewing contract'
+          timekeeper_id: 345
+          timekeeper_first_name: 'Lisa'
+          timekeeper_last_name: 'Jones'
+          timekeeper_classsification: 'ASSOC'
+        - line_item_number: 45298
+          line_item_type: 'E'
+          line_item_unit_cost: '10.00'
+          line_item_number_of_units: '60'
+          line_item_total: '600.00'
+          line_item_currency: 'USD'
+          line_item_date: '20200118'
+          line_item_description: 'Printing costs'
+        - line_item_number: 45455
+          line_item_type: 'F'
+          line_item_unit_cost: '500.00'
+          line_item_number_of_units: '7'
+          line_item_adjustment_amount: '-500.00'
+          line_item_total: '3000.00'
+          line_item_currency: 'USD'
+          line_item_date: '20200215'
+          line_item_description: 'Reviewing contract'
+          timekeeper_id: 345
+          timekeeper_first_name: 'Lisa'
+          timekeeper_last_name: 'Jones'
+          timekeeper_classsification: 'ASSOC'
+        - line_item_number: 45458
+          line_item_type: 'F'
+          line_item_unit_cost: '1000.00'
+          line_item_number_of_units: '6'
+          line_item_total: '6000.00'
+          line_item_currency: 'USD'
+          line_item_date: '20200216'
+          line_item_description: 'Reviewing contract'
+          timekeeper_id: 102
+          timekeeper_first_name: 'Fiona'
+          timekeeper_last_name: 'Williams'
+          timekeeper_classsification: 'PARTNR'
+        - line_item_number: 45475
+          line_item_type: 'E'
+          line_item_unit_cost: '5000.00'
+          line_item_number_of_units: '1'
+          line_item_total: '5000.00'
+          line_item_currency: 'USD'
+          line_item_date: '20200218'
+          line_item_description: 'Travel - flights'
+
