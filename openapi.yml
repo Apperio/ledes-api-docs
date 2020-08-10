@@ -186,11 +186,23 @@ paths:
         '404':
           description: 'Not found. No invoice with that id.'
 
-  /accruals:
-    post:
+  /matter/{id_discriminator}/{id}/accruals:
+    put:
+      parameters:
+        - in: path
+          name: id_discriminator
+          schema:
+            type: string
+            enum: [law_firm_matter_id, client_matter_id]
+            description: Whether the law firm's unique id or client unique id for the matter is being used to identifiy the correct resource.
+        - in: path
+          name: id
+          schema:
+            type: string
+            description: the unique identifier for the matter, according to either the law firm system or client system.
       tags:
         - Accruals
-      summary: Post accruals data for one matter
+      summary: Update the accruals data for one matter
       description: Proposal - update the accrual figures for a single matter.
       requestBody:
         content:
@@ -312,6 +324,33 @@ paths:
           description: Accrual updated correctly
         '404':
           description: Not Found. Matter could not be found.
+        '501':
+          description: 'Not implemented. For use if the server never supports the use of the discriminator provided, either law_firm_matter_id or client_matter_id.'
+    delete:
+      tags:
+        - Accruals
+      summary: Delete accruals for a matter
+      description: Delete the accurals for a matter. The accrual figures should be set to null, not zero.
+      parameters:
+        - in: path
+          name: id_discriminator
+          schema:
+            type: string
+            enum: [law_firm_matter_id, client_matter_id]
+            description: Whether the law firm or client reference is being used
+        - in: path
+          name: id
+          schema:
+            type: string
+            description: the unique identifier for the matter, according to either the law firm system or client system.
+      responses:
+        '200':
+          description: 'Accruals deleted.'
+        '404':
+          description: 'Matter not found.'
+        '501':
+          description: 'Not implemented. For use if the server never supports the use of the discriminator provided, either law_firm_matter_id or client_matter_id.'
+
 tags:
   - name: Invoices
     description: Manage invoice data.
