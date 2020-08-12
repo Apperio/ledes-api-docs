@@ -17,7 +17,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 servers:
-  - url: https://api.example.com/api/v1/business/{business_id}
+  - url: https://api.example.com/api/v1/businesses/{business_id}
     description: The base URL contains a server URL, and an endpoint path that includes a unique identifier for that business, within the vendor platform.
 paths:
   /invoices:
