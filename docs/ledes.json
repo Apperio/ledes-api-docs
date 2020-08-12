@@ -156,7 +156,7 @@
             "description": "User does not have permission to post invoices."
           },
           "415": {
-            "description": "Unsupported media type. The server does not support this LEDES file standard."
+            "description": "Unsupported media type. The server does not support this LEDES\nfile standard."
           },
           "500": {
             "description": "Internal server error."
@@ -247,27 +247,15 @@
         }
       }
     },
-    "/matter/{id_discriminator}/{id}/accruals": {
+    "/matter/{client_matter_id}/accruals": {
       "put": {
         "parameters": [
           {
             "in": "path",
-            "name": "id_discriminator",
+            "name": "client_matter_id",
             "schema": {
               "type": "string",
-              "enum": [
-                "law_firm_matter_id",
-                "client_matter_id"
-              ],
-              "description": "Whether the law firm's unique id or client unique id for the matter is being used to identifiy the correct resource."
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
-            "schema": {
-              "type": "string",
-              "description": "the unique identifier for the matter, according to either the law firm system or client system."
+              "description": "the unique identifier for the matter, according to either client system."
             }
           }
         ],
@@ -282,9 +270,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "law_firm_matter_id": {
-                    "$ref": "#/components/schemas/law_firm_matter_id"
-                  },
                   "accrual_currency": {
                     "$ref": "#/components/schemas/accrual_currency"
                   },
@@ -453,19 +438,7 @@
         "parameters": [
           {
             "in": "path",
-            "name": "id_discriminator",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "law_firm_matter_id",
-                "client_matter_id"
-              ],
-              "description": "Whether the law firm or client reference is being used"
-            }
-          },
-          {
-            "in": "path",
-            "name": "id",
+            "name": "client_matter_id",
             "schema": {
               "type": "string",
               "description": "the unique identifier for the matter, according to either the law firm system or client system."
@@ -762,7 +735,7 @@
       "ledes_filename": {
         "type": "string",
         "example": "Invoice1234.234.xml",
-        "description": "The name of the LEDES file. This does not need to be unique or be the invoice number, which is a common filename for LEDES file. It can simply be the filename of the LEDES file on the sending system side for reference purposes. This should be the filename without mime type (ie. INV-2019-123). This should not include any network or folder path information. Receiving systems can set a limit for the length of filenames with the appropriate error message described below."
+        "description": "The name of the LEDES file. This does not need to be unique or\nbe the invoice number, which is a common filename for LEDES file. It can\nsimply be the filename of the LEDES file on the sending system side for\nreference purposes. This should be the filename without mime type (ie. INV-2019-123).\nThis should not include any network or folder path information. Receiving\nsystems can set a limit for the length of filenames with the appropriate\nerror message described below."
       },
       "ledes_file_media_type": {
         "type": "string",
@@ -792,7 +765,7 @@
       },
       "related_invoice_id": {
         "type": "integer",
-        "description": "The Invoice ID of a related invoice that the submitted invoice is associated. For example, if an invoice is rejected and then a new invoice is submitted with adjustments or as an appeal, this would be the invoice ID of the originally submitted invoice. This is required for invoiceTypes of resubmit, appeal and replacement.",
+        "description": "The Invoice ID of a related invoice that the submitted invoice\nis associated. For example, if an invoice is rejected and then a new invoice\nis submitted with adjustments or as an appeal, this would be the invoice\nID of the originally submitted invoice. This is required for invoiceTypes\nof resubmit, appeal and replacement.",
         "example": 58912746
       },
       "invoice_status": {
@@ -896,7 +869,7 @@
         "properties": {
           "line_item_ref": {
             "type": "string",
-            "description": "This is the line item number from the original LEDES file  and should be set if possible. This is the file_item_nbr field in LEDES XML  or the LINE_ITEM_NUMBER field in LEDES98B/BI. If the receiving system hasn’t  maintained the original LEDES line number reference, then a value of -9999  should be returned and the rest of the line item fields should be set for the  time & billing application to understand which line item is being referenced.  This property is not used when specifying a line item adjustment in the case of  InvoiceAdjustment.adjustedLineItem since the reference to the line item is specified  with InvoiceAdjustment.originalLineItem. Read only.",
+            "description": "This is the line item number from the original LEDES file\nand should be set if possible. This is the file_item_nbr field in LEDES XML\nor the LINE_ITEM_NUMBER field in LEDES98B/BI. If the receiving system hasn’t\nmaintained the original LEDES line number reference, then a value of -9999\nshould be returned and the rest of the line item fields should be set for the\ntime & billing application to understand which line item is being referenced.\nThis property is not used when specifying a line item adjustment in the case of\nInvoiceAdjustment.adjustedLineItem since the reference to the line item is specified\nwith InvoiceAdjustment.originalLineItem. Read only.",
             "example": 5
           },
           "line_item_type": {

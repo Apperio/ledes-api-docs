@@ -186,20 +186,14 @@ paths:
         '404':
           description: 'Not found. No invoice with that id.'
 
-  /matter/{id_discriminator}/{id}/accruals:
+  /matter/{client_matter_id}/accruals:
     put:
       parameters:
         - in: path
-          name: id_discriminator
+          name: client_matter_id
           schema:
             type: string
-            enum: [law_firm_matter_id, client_matter_id]
-            description: Whether the law firm's unique id or client unique id for the matter is being used to identifiy the correct resource.
-        - in: path
-          name: id
-          schema:
-            type: string
-            description: the unique identifier for the matter, according to either the law firm system or client system.
+            description: the unique identifier for the matter, according to either client system.
       tags:
         - Accruals
       summary: Update the accruals data for one matter
@@ -210,8 +204,6 @@ paths:
             schema:
               type: object
               properties:
-                law_firm_matter_id:
-                  $ref: '#/components/schemas/law_firm_matter_id'
                 accrual_currency:
                   $ref: '#/components/schemas/accrual_currency'
                 accrual_net_total:
@@ -333,13 +325,7 @@ paths:
       description: Delete the accurals for a matter. The accrual figures should be set to null, not zero.
       parameters:
         - in: path
-          name: id_discriminator
-          schema:
-            type: string
-            enum: [law_firm_matter_id, client_matter_id]
-            description: Whether the law firm or client reference is being used
-        - in: path
-          name: id
+          name: client_matter_id
           schema:
             type: string
             description: the unique identifier for the matter, according to either the law firm system or client system.

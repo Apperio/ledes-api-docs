@@ -14,3 +14,17 @@ Then navigate to http://localhost:3001. Refresh to see any changes you've made t
 ## Public Hosted version
 
 A generated, static, publicly hosted version of this documentation can be found on Github Pages at https://apperio.github.io/ledes-api-docs/, which serves files in the `/docs` folder. To update this public static snapshot you will need to convert `openapi.yml` to json and commit to `docs/ledes.json`.
+
+The conversion from yaml to json can be done by installing yamljs gloablly with
+
+```
+npm install -g yamljs
+```
+
+then running
+
+```
+yaml2json -p openapi.yml > docs/ledes.json
+```
+
+
