@@ -42,6 +42,7 @@ properties:
     type: array
     items:
       $ref: '../common/extend_header.yaml'
-
-
-
+  invoices:
+    type: array
+    items:
+      $ref: './invoice.yaml'
