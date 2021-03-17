@@ -11,6 +11,7 @@ required:
   - lf_billing_contact
   - source_app
   - app_version
+  - clients
 properties:
   lf_vendor_id:
     type: string
@@ -53,3 +54,7 @@ properties:
     type: array
     items:
       $ref: '../common/extend_header.yaml'
+  clients:
+    type: array
+    items:
+      $ref: './client.yaml'

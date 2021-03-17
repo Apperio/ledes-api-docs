@@ -1,0 +1,94 @@
+# Tax
+type: object
+description: Tax Information
+required:
+  - tx_id
+  - tx_id_number
+  - tax_type
+  - tax_tiers
+  - taxing_jurisdiction_country
+  - tax_on_tax
+  - is_increase
+properties:
+  tx_id:
+    type: string
+    description: |
+      A unique identifier associated with the tax/rate/jurisdiction, assigned by the law firm.
+    example: T1234556
+  tx_id_number:
+    type: string
+    description: |
+      Tax ID Number for law firm or vendor associated with specific tax.
+    example: US1234
+  tax_type:
+    type: string
+    description: |
+      Type of tax.  Based on a value specified by the client.
+      Examples in US: "Federal", "State", "Local".
+      Examples in Canada: "GST", "HST", "PST", "TVQ".
+    example: PST
+  tax_tiers:
+    type: boolean
+    description: |
+      "tax_tiers" = true only where there are different tax rates applicable to billed tiers.   
+      If Tiered Tax is true, the LEDES invoice should contain only one matter;
+      multiple matters/invoice are not allowed for Tiered Taxes.
+  tax_rate_percent:
+    type: number
+    example: 0.20
+    description: |
+      Percentage tax rate against charge, i.e. 7.2516% tax_rate_percent would be
+      represented as "0.072516". The value in this field is always positive.  In some
+      countries, tax could be a negative number (for example, Brazil has a negative
+      withholding tax), in which case @TAX.increase_decrease = Decrease.
+      If a Tiered Tax, the value in this field should be null.  The tax rates
+      associated with a Tiered Tax are defined in the @TAX_TIER_DETAIL segment.
+  taxing_jurisdiction_country:
+    $ref: '../common_fields/country.yaml'
+  taxing_jurisdiction_locality:
+    type: string
+    example: ON
+    description: |
+      The locality of the taxing jurisdiction.  Use accepted abbreviations for state or
+      province mandated by the country's postal service.  For Canadian PST,
+      taxing_jurisdiction_locality for Ontario would be "ON"; for Local tax in New York
+      City, taxing_jurisdiction_locality would be "New York, NY"; for state tax in
+      Georgia (USA), taxing_jurisdiction_locality would be "GA"; for VAT tax in France,
+      taxing_jurisdiction_locality would be null.
+  tax_on_tax:
+    type: boolean
+    description: |
+      "Tax-on-Tax" is a situation where one or more taxes in a tax jurisdiction are based
+      on the sum of the corresponding invoice line item totals AND any other tax amount
+      previously applied to those line item totals. For example, formerly n both Quebec and
+      Prince Edward Island Canada had specific taxes calculated on the sum of the line
+      items plus the federal tax paid on those line items.
+  tax_on_tax_id:
+    type: string
+    example: tx123456
+    description: |
+      In a "tax-on-tax" situation (described above), the tax_on_tax_id is the tx_id of the
+      tax that should be included in the tax calculation for the current tx_id.  For
+      example, in Canada the TVQ tax includes not only the line items taxed, but also the
+      GST tax for these line items.  The proper response to this tax_on_tax_id field would
+      be the tx_id for the GST tax. Although we are currently not aware of any such
+      situation, it may be the case in a jurisdiction that there is a tax-on-tax-on-tax
+      situation.  It is anticipated that this field would hierarchically grow as necessary.
+      Using the example in the previous paragraph, say that tax3 includes TVQ and GST taxes.
+      Since the TVQ tax already shows the hierarchical relationship with GST in the
+      tax_on_tax_id field, tax 3 would list the tx_id for TVQ in this tax_on_tax_id field.
+  is_increase:
+    type: boolean
+    description: |
+      Identifies whether the tax results in increasing or decreasing the matter/invoice.
+      Almost all taxes are "Increase", the exception being Withholding Tax.
+      Withholding Tax is tax that is paid by the client to the government as opposed to
+      being collected by the firm and paid to the government.
+      While taxes are itemized against individual line items on the bill, Withholding
+      Taxes are calculated against total of fees and total of disbursements charged pre-tax
+      and post split on the invoice.  Individual line items will not associate with the
+      @TAX.tx_id for withholding taxes. There can be more than one Withholding Tax on an
+      invoice, but each Withholding Tax would have a different tax rate percentage.
+      The total of the Withholding Tax(es) do not have to equal to the other taxes on the
+      invoice; they could be less than or greater than the total of the other taxes
+      charged on the invoice.
