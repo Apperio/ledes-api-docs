@@ -1,0 +1,42 @@
+# Address
+type: object
+description: The Address
+required:
+  - address_1
+  - city
+  - country
+  - phone
+properties:
+  address_1:
+    type: string
+    description: The street address
+    example: 235 High Holborn
+  address_2:
+    type: string
+    description: Second street address
+  address_3:
+    type: string
+    description: Third street address
+  city:
+    type: string
+    description: The city
+    example: London
+  state_province:
+    type: string
+    description: |
+      The state or province.  Required except in countries without an equivalent address component.
+      Use accepted abbreviations mandated by the country's postal service.  
+    example: Greater London
+  zip_postal_code:
+    type: string
+    description: The postal code.  Required except in countries without an equivalent address component.  
+    example: WC1V 7LE
+  country:
+    $ref: '../common_fields/country.yaml'
+  phone:
+    type: string
+    description: The phone number
+    example: +44 1234 567890
+  fax:
+    type: string
+    description: The fax number

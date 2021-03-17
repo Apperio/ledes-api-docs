@@ -20,45 +20,26 @@ servers:
   - url: https://api.example.com/api/v1/businesses/{business_id}
     description: The base URL contains a server URL, and an endpoint path that includes a unique identifier for that business, within the vendor platform.
 paths:
-  /invoices:
+  /business/{business-id}/invoices:
     post:
       tags:
         - Invoices
+      parameters:
+        - name: business-id
+          in: path
+          schema:
+            type: uuid
+            description: Business Identifier
+            example: 194829D1-C7E6-44F0-82B0-7223C54F7F76
       summary: Submit an invoice
       requestBody:
         description: |
-          Send an invoice using one of the existing LEDES file formats (ie. LEDES XML) as a file.
-
-          This is the main method to send an existing LEDES invoice file.
-          The LEDES file can be optionally encrypted.
-          NOTE: It is already required that all data be encrypted in transit, so this would be additional encryption
-          of the LEDES file, which would then require a mechanism for the receiving system to be able to unencrypt
-          the LEDES file. If encrypted, the encryption method is part of the system setup. Returns an invoiceID,
-          receivedDateTime, and errors (see response below). The invoiceID is used for subsequent API calls to send
-          an attachment for the invoice or to get the status of the invoice. The vendor for the invoice should be
-          identified by the authentication and checked against the vendor identified within the LEDES files.'
+          The LEDES format based on LEDES XML Ebilling ver. 2.2
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              properties:
-                invoice:
-                  $ref: '#/components/schemas/invoice_post'
-                ledesfile:
-                  type: string
-                  format: binary
-              encoding:
-                ledesfile:
-                  contentType: text/plain, text/csv, application/xml
-            example:
-              invoice:
-                ledes_format: LEDES98BIV2
-                encrypted: False
-                ledes_filename: Invoice1234.234.xml
-                ledes_file_media_type: 'text/csv'
-                invoice_type: INVOICE
-              ledesfile: '<binary>'
+              $ref: 'definitions/invoice/invoice_bundle.yaml'
       responses:
         '201':
           description: Created
@@ -123,9 +104,6 @@ paths:
                           example: "Invalid invoice_type : LEDES99B"
         '403':
           description: User does not have permission to post invoices.
-        '415':
-          description: Unsupported media type. The server does not support this LEDES
-            file standard.
         '500':
           description: Internal server error.
   /invoices/{invoiceid}:

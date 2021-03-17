@@ -1,0 +1,55 @@
+# Firm
+type: object
+description: |
+  Information on the firm whose invoices have been submitted.  There will be 1 or more firms
+  in a LEDES submission. Allows for the submission of invoices for more than one firm in the same
+  invoice file.
+required:
+  - lf_vendor_id
+  - lf_name
+  - lf_address
+  - lf_billing_contact
+  - source_app
+  - app_version
+properties:
+  lf_vendor_id:
+    type: string
+    description: |
+      A value that uniquely identifies the vendor.  Depending on the location of the vendor, this
+      value could be the vendor's tax id number, the vendor's VAT registration number, the
+      vendor's DUNS number, the vendor's business registration number, or any other number or used
+      by the vendor to uniquely identify itself, preferably to its local taxing or governmental
+      authority.
+    example: ABC123
+  lf_id:
+    type: string
+    description: An optional field assigned by the law firm to identify the firm. 
+    example: A12345
+  lf_name:
+    type: string
+    description: The name of the law firm. 
+    example: Botts and Co.
+  lf_address:
+    description: Address of the law firm
+    $ref: '../common/address.yaml'
+  lf_remit_address:
+    description: If not provided then it's assumed to be the same as the lf_address
+    $ref: '../common/address.yaml'
+  lf_billing_contact:
+    $ref: '../common/contact.yaml'
+  source_app:
+    type: string
+    description: The name of the program used to generate this invoice 
+    example: Elite
+  app_version:
+    type: string
+    description: The version of the source_app  
+    example: 9.3b
+  firm_URL:
+    type: string
+    description: Website address of the firm
+    example: https://www.bottsandco.com
+  extend_header:
+    type: array
+    items:
+      $ref: '../common/extend_header.yaml'
