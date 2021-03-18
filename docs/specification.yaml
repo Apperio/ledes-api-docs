@@ -1,0 +1,1436 @@
+openapi: 3.0.3
+info:
+  title: LEDES API (For illustration only)
+  termsOfService: https://ledes.org/terms-of-use/
+  description: >
+    This is an illustration of how the OpenAPI specification could be used to
+    document the LEDES API for the [ledes.org](https://ledes.org/ledes-api/).
+
+    It is not complete and field names and enum values have been changed to
+    conform to a different lettercase convention (rather than CamelCase).
+
+
+    The public github repo for this site is available on
+    [https://github.com/Apperio/ledes-api-docs](https://github.com/Apperio/ledes-api-docs)
+    where you 
+
+    can see the
+    [yaml](https://github.com/Apperio/ledes-api-docs/blob/master/openapi.yml)
+    file that was used to generate this page.
+
+
+    The paths defined in the this URL must be relative to a base URL that
+    contains a unique discriminator for that business, within what could
+    potentially be
+
+    a multitenant solution.
+
+
+    # Security
+
+
+    > I've taken a section from the word document to demonstrate how static
+    content
+
+    > is rendered.
+
+
+    Security is paramount in the solution since legal invoices can contain
+    highly private
+
+    information. For example, the invoice line item descriptions and matter
+    names can
+
+    contain highly sensitive information. A comprehensive security structure is
+    highly
+
+    recommended, however, the LEDES API standard requires common security
+    measures.
+
+    Transmission encryption and session authentication are required, with
+    recommended
+
+    levels.  Content encryption is also highly recommended to address additional
+
+    vulnerabilities in the management of sensitive data.  These security
+    recommendations in
+
+    general will need to be re-evaluated on a regular basis.
+
+
+    ## Transmission Encryption Security
+
+    All data should be encrypted in transit including authentication credentials
+    (passwords),
+
+    API keys, or JSON Web Tokens. This is needed to allow users to authenticate
+    with the
+
+    service and protects the integrity of the transmitted data.
+
+
+    This first level of security can be achieved with HTTPS (TLS) and the use of
+    mutually
+
+    authenticated client-side certificates to provide additional protection for
+    the LEDES
+
+    API standard.  If implemented, client certificates will need to be managed
+    between the
+
+    law firm (sending system) and e-billing vendor (receiving system) by having
+    certificates
+
+    built from special 'roots'.
+
+
+    *Minimum Requirement:*  HTTPS (TLS 1.1+)
+
+
+    *Recommendation:* Client Certificates
+
+
+    *Implementation:* Vendor application (all vendors)
+
+
+    *User:* no action required
+
+
+    ## Session Authentication Security
+
+    Once transmission is secure, interaction with the user must be addressed.
+
+    This can be addressed by employing a secure authentication and session
+    management
+
+    mechanism. User authorization for resources and data must be orchestrated
+    through
+
+    multiple vulnerability points, such as access permissions, session duration,
+    and global
+
+    logout.
+
+
+    The widely adopted protocols for authentication and session management today
+    are
+
+    OAuth 2.0 and OpenID Connect.  OAuth 2.0 introduces an authorization layer
+    and separates
+
+    the web client from the sensitive system resources.  The user is issued
+    unique
+
+    credentials, which protects the credentials used to manage these resources.
+
+    OpenID Connect works with OAuth 2.0 to add an identity layer on top of the
+    authentication
+
+    layer, so more sophisticated permissions can be orchestrated in the
+    application. 
+
+
+    Requirements and recommendations are listed as “or equivalent” in
+    recognition of
+
+    multiple Identity Providers a vendor may subscribe to in order to offer
+    appropriate
+
+    authentication security.  Popular Identity Providers include Amazon, Google,
+    and
+
+    Microsoft, however no provider is endorsed or recommended here.
+
+
+    *Minimum Requirement:* OAuth 2.0 (or equivalent)
+
+
+    *Recommendation:* Open ID (or equivalent)
+
+
+    *Implementation:* Vendor applications and system (or service) integration
+
+
+    *User:* one-time authorization set up
+
+
+    ## Content Encryption Security
+
+    All invoice and related data should be encrypted while in use and at rest. 
+    This is the
+
+    final measure recommended to provide adequate security through the full life
+    cycle of
+
+    the data and application.
+
+    There are multiple methods to provide content encryption and it is highly
+    recommended
+
+    that any new implementation decisions are part of a comprehensive analysis
+    of current
+
+    application and system integration vulnerabilities between vendors and with
+    their end
+
+    users. The current specification for encryption established by the U.S.
+    National
+
+    Institutes of Standards and Technology (NIST) and adopted globally is
+    Advanced
+
+    Encryption Standard (AES).  This is a symmetric key approach, with accepted
+    key lengths
+
+    of 128, 192, and 256 bits.  Recent successful attacks on 128 bit keys
+    suggest it is
+
+    appropriate to consider the use of longer keys.
+
+
+    The API allows for the content to be optionally encrypted before it is
+    transmitted,
+
+    however it is not required. It is highly recommended that eBilling vendor
+    support
+
+    content encryption, however not all time and billing systems may support it.
+    Below are
+
+    the requirements for when the content is encrypted.
+
+
+    *Minimum Requirement:* AES-256 (or equivalent) if content encryption is
+    used.
+
+
+    *Implementation:* Vendor applications and system integration
+
+
+    *User:* one-time authorization set up
+  contact:
+    email: loc@ledes.org, stephen@apperio.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://api.example.com/api/v1/businesses/{business_id}
+    description: >-
+      The base URL contains a server URL, and an endpoint path that includes a
+      unique identifier for that business, within the vendor platform.
+paths:
+  /v1/business/{business-id}/invoices:
+    post:
+      tags:
+        - Invoices
+      parameters:
+        - name: business-id
+          in: path
+          schema:
+            type: uuid
+            description: Business Identifier
+            example: 194829D1-C7E6-44F0-82B0-7223C54F7F76
+      summary: |
+        Submit an batch of invoices.
+      requestBody:
+        description: |
+          The LEDES format based on LEDES XML Ebilling ver. 2.2
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: |
+                The LEDES format based on LEDES XML Ebilling ver. 2.2
+              properties:
+                firms:
+                  type: array
+                  description: >
+                    There will be one or more firms in a LEDES submission. This
+                    allows for the submission
+
+                    of invoices for more than one firm in the same submission.
+                  items:
+                    type: object
+                    description: >
+                      Information on the firm whose invoices have been
+                      submitted.  There will be 1 or more firms
+
+                      in a LEDES submission. Allows for the submission of
+                      invoices for more than one firm in the same
+
+                      invoice file.
+                    required:
+                      - lf_vendor_id
+                      - lf_name
+                      - lf_address
+                      - lf_billing_contact
+                      - source_app
+                      - app_version
+                      - clients
+                    properties:
+                      lf_vendor_id:
+                        type: string
+                        description: >
+                          A value that uniquely identifies the vendor. 
+                          Depending on the location of the vendor, this
+
+                          value could be the vendor's tax id number, the
+                          vendor's VAT registration number, the
+
+                          vendor's DUNS number, the vendor's business
+                          registration number, or any other number or used
+
+                          by the vendor to uniquely identify itself, preferably
+                          to its local taxing or governmental
+
+                          authority.
+                        example: ABC123
+                      lf_id:
+                        type: string
+                        description: "An optional field assigned by the law firm to identify the firm.\_"
+                        example: A12345
+                      lf_name:
+                        type: string
+                        description: "The name of the law firm.\_"
+                        example: Botts and Co.
+                      lf_address:
+                        description: Address of the law firm
+                        type: object
+                        required: &ref_0
+                          - address_1
+                          - city
+                          - country
+                          - phone
+                        properties: &ref_1
+                          address_1:
+                            type: string
+                            description: The street address
+                            example: 235 High Holborn
+                          address_2:
+                            type: string
+                            description: Second street address
+                          address_3:
+                            type: string
+                            description: Third street address
+                          city:
+                            type: string
+                            description: The city
+                            example: London
+                          state_province:
+                            type: string
+                            description: >
+                              The state or province.  Required except in
+                              countries without an equivalent address component.
+
+                              Use accepted abbreviations mandated by the
+                              country's postal service.  
+                            example: Greater London
+                          zip_postal_code:
+                            type: string
+                            description: >-
+                              The postal code.  Required except in countries
+                              without an equivalent address component.
+                            example: WC1V 7LE
+                          country: &ref_4
+                            type: string
+                            description: >
+                              The country.  Use ISO 3166 country code set forth
+                              by International Standards
+
+                              Organization (www.iso.org.)  
+                            example: GB
+                            minLength: 2
+                            maxLength: 3
+                          phone:
+                            type: string
+                            description: The phone number
+                            example: +44 1234 567890
+                          fax:
+                            type: string
+                            description: The fax number
+                      lf_remit_address:
+                        description: >-
+                          If not provided then it's assumed to be the same as
+                          the lf_address
+                        type: object
+                        required: *ref_0
+                        properties: *ref_1
+                      lf_billing_contact: &ref_2
+                        type: object
+                        description: Contact Information
+                        required:
+                          - contact_lname
+                          - contact_fname
+                          - contact_email
+                        properties:
+                          contact_lname:
+                            type: string
+                            description: First name
+                            example: Alice
+                          contact_fname:
+                            type: string
+                            description: Second name
+                            example: Hobbs
+                          contact_id:
+                            type: string
+                            description: Contact ID
+                          contact_phone:
+                            type: string
+                            description: Phone number
+                          contact_fax:
+                            type: string
+                            description: Contact Fax
+                          contact_email:
+                            type: string
+                            description: Contact email
+                            example: ahobbs@example.org
+                      source_app:
+                        type: string
+                        description: The name of the program used to generate this invoice
+                        example: Elite
+                      app_version:
+                        type: string
+                        description: The version of the source_app
+                        example: 9.3b
+                      firm_URL:
+                        type: string
+                        description: Website address of the firm
+                        example: https://www.bottsandco.com
+                      extend_header:
+                        type: array
+                        items: &ref_3
+                          type: object
+                          description: >-
+                            Provide supplemental information as name / value
+                            pairs
+                          required:
+                            - name
+                            - value
+                          properties:
+                            name:
+                              type: string
+                              description: The name of the property
+                              example: colour
+                            value:
+                              type: string
+                              description: The value of the property
+                              example: red
+                      clients:
+                        type: array
+                        items:
+                          type: object
+                          description: |
+                            The Client and their invoices
+                          required:
+                            - cl_lf_id
+                            - cl_name
+                            - cl_address
+                          properties:
+                            cl_id:
+                              type: string
+                              description: The law firm assigned client code.
+                              example: CLI12345
+                            cl_lf_id:
+                              type: string
+                              description: >
+                                A vendor ID that uniquely identifies the law
+                                firm, as specified by the client.
+
+                                Could be the law firm's tax id number or other
+                                value used by the client to uniquely
+
+                                identify the law firm.
+
+                                Values required in this field may vary from
+                                client to client, but within a client's
+
+                                e-billing implementation only one such unique ID
+                                is allowed per law firm.
+
+                                Some client AP systems maintain multiple vendor
+                                IDs for a law firm that could be,
+
+                                for example, location dependent.  It is not
+                                intended that multiple lf_vendor_ids for
+
+                                the same law firm would be supported by this
+                                field as they would be impossible to
+
+                                program into the law firm's time and billing
+                                software.  Clients must choose only one
+
+                                unique identifier per law firm to be used in
+                                this field.  
+                              example: CLI12345
+                            cl_name:
+                              type: string
+                              description: >
+                                The name of the client as required by the client
+                                in the electronic submission.
+
+                                Used as a key by the receiving system.  
+                              example: Acme Corp
+                            cl_address:
+                              type: object
+                              description: The Address
+                              required: *ref_0
+                              properties: *ref_1
+                            client_contact: *ref_2
+                            cl_tax_id:
+                              type: string
+                              description: >-
+                                The client's tax id number to which law firm
+                                taxes are charged.
+                            extend_header:
+                              type: array
+                              items: *ref_3
+                            invoices:
+                              type: array
+                              items:
+                                type: object
+                                description: Invoice information
+                                required:
+                                  - tx_id
+                                  - tx_id_number
+                                  - tax_type
+                                  - tax_tiers
+                                  - taxing_jurisdiction_country
+                                  - tax_on_tax
+                                  - is_increase
+                                properties:
+                                  inv_id:
+                                    type: string
+                                    description: >
+                                      The law firm assigned invoice number or
+                                      code.
+
+                                      Multiple inv_id's can be billed in the
+                                      same request. 
+                                    example: INV1234556
+                                  inv_date:
+                                    type: date
+                                    description: The invoice date
+                                    example: '2021-03-17'
+                                  inv_due_date:
+                                    type: date
+                                    description: The invoice due date
+                                    example: '2021-04-30'
+                                  inv_currency:
+                                    type: string
+                                    example: GBP
+                                    description: ISO 4217 Three letter currency code
+                                    minLength: 3
+                                    maxLength: 3
+                taxes:
+                  type: array
+                  description: >
+                    There will be 0 or more @TAX segments per file.  If items
+                    are not taxed, no
+
+                    @TAX section would be included in the file.  
+                  items:
+                    type: object
+                    description: Tax Information
+                    required:
+                      - tx_id
+                      - tx_id_number
+                      - tax_type
+                      - tax_tiers
+                      - taxing_jurisdiction_country
+                      - tax_on_tax
+                      - is_increase
+                    properties:
+                      tx_id:
+                        type: string
+                        description: >
+                          A unique identifier associated with the
+                          tax/rate/jurisdiction, assigned by the law firm.
+                        example: T1234556
+                      tx_id_number:
+                        type: string
+                        description: >
+                          Tax ID Number for law firm or vendor associated with
+                          specific tax.
+                        example: US1234
+                      tax_type:
+                        type: string
+                        description: >
+                          Type of tax.  Based on a value specified by the
+                          client.
+
+                          Examples in US: "Federal", "State", "Local".
+
+                          Examples in Canada: "GST", "HST", "PST", "TVQ".
+                        example: PST
+                      tax_tiers:
+                        type: boolean
+                        description: >
+                          "tax_tiers" = true only where there are different tax
+                          rates applicable to billed tiers.   
+
+                          If Tiered Tax is true, the LEDES invoice should
+                          contain only one matter;
+
+                          multiple matters/invoice are not allowed for Tiered
+                          Taxes.
+                      tax_rate_percent:
+                        type: number
+                        example: 0.2
+                        description: >
+                          Percentage tax rate against charge, i.e. 7.2516%
+                          tax_rate_percent would be
+
+                          represented as "0.072516". The value in this field is
+                          always positive.  In some
+
+                          countries, tax could be a negative number (for
+                          example, Brazil has a negative
+
+                          withholding tax), in which case @TAX.increase_decrease
+                          = Decrease.
+
+                          If a Tiered Tax, the value in this field should be
+                          null.  The tax rates
+
+                          associated with a Tiered Tax are defined in the
+                          @TAX_TIER_DETAIL segment.
+                      taxing_jurisdiction_country: *ref_4
+                      taxing_jurisdiction_locality:
+                        type: string
+                        example: 'ON'
+                        description: >
+                          The locality of the taxing jurisdiction.  Use accepted
+                          abbreviations for state or
+
+                          province mandated by the country's postal service. 
+                          For Canadian PST,
+
+                          taxing_jurisdiction_locality for Ontario would be
+                          "ON"; for Local tax in New York
+
+                          City, taxing_jurisdiction_locality would be "New York,
+                          NY"; for state tax in
+
+                          Georgia (USA), taxing_jurisdiction_locality would be
+                          "GA"; for VAT tax in France,
+
+                          taxing_jurisdiction_locality would be null.
+                      tax_on_tax:
+                        type: boolean
+                        description: "\"Tax-on-Tax\" is a situation where one or more taxes in a tax jurisdiction are based\non the sum of the corresponding invoice line item totals AND any other tax amount\npreviously applied to those line item totals. For example, formerly n both\_Quebec and\nPrince Edward Island Canada had specific taxes calculated on the sum of the line\nitems plus the federal tax paid on those line items.\n"
+                      tax_on_tax_id:
+                        type: string
+                        example: tx123456
+                        description: "In a \"tax-on-tax\" situation (described above), the tax_on_tax_id is the tx_id of the\ntax that should be included in the tax calculation for the current tx_id.\_ For\nexample, in Canada the TVQ tax includes not only the line items taxed, but also the\nGST tax for these line items.\_ The proper response to this tax_on_tax_id field would\nbe the tx_id for the GST tax. Although we are currently not aware of any such\nsituation, it may be the case in a jurisdiction that there is a tax-on-tax-on-tax\nsituation.  It is anticipated that this field would hierarchically grow as necessary.\nUsing the example in the previous paragraph, say that tax3 includes TVQ and GST taxes.\nSince the TVQ tax already shows the hierarchical relationship with GST in the\ntax_on_tax_id field, tax 3 would list the tx_id for TVQ in this tax_on_tax_id field.\n"
+                      is_increase:
+                        type: boolean
+                        description: >
+                          Identifies whether the tax results in increasing or
+                          decreasing the matter/invoice.
+
+                          Almost all taxes are "Increase", the exception being
+                          Withholding Tax.
+
+                          Withholding Tax is tax that is paid by the client to
+                          the government as opposed to
+
+                          being collected by the firm and paid to the
+                          government.
+
+                          While taxes are itemized against individual line items
+                          on the bill, Withholding
+
+                          Taxes are calculated against total of fees and total
+                          of disbursements charged pre-tax
+
+                          and post split on the invoice.  Individual line items
+                          will not associate with the
+
+                          @TAX.tx_id for withholding taxes. There can be more
+                          than one Withholding Tax on an
+
+                          invoice, but each Withholding Tax would have a
+                          different tax rate percentage.
+
+                          The total of the Withholding Tax(es) do not have to
+                          equal to the other taxes on the
+
+                          invoice; they could be less than or greater than the
+                          total of the other taxes
+
+                          charged on the invoice.
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invoiceid: &ref_5
+                    type: string
+                    description: The invoice id
+                    example: '7846859'
+                  received_time:
+                    type: string
+                    description: The time the invoice was received.
+                    example: '2020-14-19T15:55:12-04:00'
+                  invoice_status: &ref_6
+                    type: string
+                    description: The status of the invoice
+                    enum:
+                      - RECEIVED
+                      - FILE_ERROR
+                      - PENDING_CLIENT
+                      - PENDING_TAX_AUTHORITY
+                      - PENDING_VENDOR
+                      - DELIVERED_TO_CLIENT
+                      - REJECTED
+                      - APPROVED
+                      - SENT_TO_AP
+                      - PAID
+                    example: RECEIVED
+                example:
+                  invoiceid: '4567'
+                  received_time: '2020-14-19T15:55:12-04:00'
+                  invoice_status: RECEIVED
+        '202':
+          description: Accepted. Processing not completed yet.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invoiceid: *ref_5
+                  received_time:
+                    type: string
+                    description: The time the invoice was received.
+                    example: '2020-14-19T15:55:12-04:00'
+                  invoice_status: *ref_6
+                example:
+                  invoiceid: '4567'
+                  received_time: '2020-14-19T15:55:12-04:00'
+                  invoice_status: RECEIVED
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invoiceid: *ref_5
+                  received_time:
+                    type: string
+                    description: The time the invoice was received.
+                    example: '2020-14-19T15:55:12-04:00'
+                  invoice_status: *ref_6
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                          example: 'Invalid invoice_type : LEDES99B'
+        '403':
+          description: User does not have permission to post invoices.
+        '500':
+          description: Internal server error.
+  /invoices/{invoiceid}:
+    get:
+      tags:
+        - Invoices
+      summary: Get an invoice
+      description: Returns a single invoice with status
+      parameters:
+        - in: path
+          name: invoiceid
+          schema: *ref_5
+      responses:
+        '200':
+          description: OK. Invoice found.
+          content:
+            application/json:
+              schema:
+                properties:
+                  invoiceid: *ref_5
+                  vendor_invoice_number:
+                    type: string
+                    description: >-
+                      The original invoice number specified by the sending
+                      system.
+                  invoice_status: *ref_6
+                  invoice_status_time:
+                    type: string
+                    description: The time the status was set in UTC using ISO 8601.
+                    example: '2020-04-19T15:55:12-04:00'
+                  rejection_note:
+                    type: string
+                    description: >-
+                      When an invoice is rejected, this can be used to describe
+                      the overall reason for the rejection. Note that the
+                      invoiceErrors element holds a more detailed description of
+                      each individual error and this element should duplicate
+                      that information.
+                    example: Too many billing guideline violaions.
+                  original_total:
+                    type: string
+                    description: >-
+                      The original invoice total amount from the vendor. This
+                      should be a string of numbers, followed by a decimal
+                      place, followed by two numbers. This should always be
+                      included unless the LEDES files could not be parsed.
+                    example: '55435.00'
+                  original_currency:
+                    type: string
+                    description: >-
+                      The currency for the original invoice total amount from
+                      the vendor. This should always be included unless the
+                      LEDES files could not be parsed. The three-character
+                      ISO-4217 currency code.
+                    example: USD
+                  approved_total:
+                    type: string
+                    description: >-
+                      The invoice total amount approved by the client. For
+                      jurisdictions where clients can pay less than the
+                      originalTotal this is the amount the client plans to pay
+                      or has paid. The invoiceAdjustments section below should
+                      document the adjustments the client is imposing on the
+                      invoice. If the status is Paid, this should also match the
+                      invoicePayment data below.
+                    example: '35435.00'
+                  approved_currency:
+                    type: string
+                    description: >-
+                      The currency for the approved_total. The three-character
+                      ISO-4217 currency code.
+                    example: USD
+                  invoice_errors: &ref_21
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        error_type:
+                          type: string
+                          enum:
+                            - FILE_STRUCTURE
+                            - MISSING_FIELD
+                            - BAD_FILE_DATA
+                            - INVOICE_LEVEL_ERROR
+                            - LINE_ITEM_ERROR
+                            - AUDIT_ERROR
+                            - AFA_ERROR
+                          example: LINE_ITEM_ERROR
+                        datetime:
+                          type: string
+                          description: >-
+                            The date and time of the error represented as an
+                            offest from UTC using ISO 8601.
+                          example: '2020-04-19T15:55:12Z'
+                        error_code:
+                          type: string
+                          example: BD214
+                        error_name:
+                          type: string
+                          example: Invalid Timekeeper
+                        error_description:
+                          type: string
+                          example: 'Line item #6 has an invalid timekeeper ID: 12345.'
+                        line_item: &ref_7
+                          properties:
+                            line_item_ref:
+                              type: string
+                              description: >-
+                                This is the line item number from the original
+                                LEDES file  and should be set if possible. This
+                                is the file_item_nbr field in LEDES XML  or the
+                                LINE_ITEM_NUMBER field in LEDES98B/BI. If the
+                                receiving system hasn’t  maintained the original
+                                LEDES line number reference, then a value of
+                                -9999  should be returned and the rest of the
+                                line item fields should be set for the  time &
+                                billing application to understand which line
+                                item is being referenced.  This property is not
+                                used when specifying a line item adjustment in
+                                the case of  InvoiceAdjustment.adjustedLineItem
+                                since the reference to the line item is
+                                specified  with
+                                InvoiceAdjustment.originalLineItem. Read only.
+                              example: 5
+                            line_item_type:
+                              type: string
+                              description: >-
+                                The type of line item, either a fee (F) or an
+                                expense (E)
+                              enum:
+                                - F
+                                - E
+                              example: F
+                  adjustments: &ref_22
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        adjustment_type:
+                          type: string
+                          enum:
+                            - INVOICE_LEVEL_ADJUSTMENT
+                            - LINE_ITEM_ADJUSTMENT
+                          example: LINE_ITEM_ADJUSTMENT
+                        datetime:
+                          type: string
+                          description: The date and time the adjustment was identified.
+                          example: '2020-04-19T15:55:12+02:00'
+                        adjustment_amount:
+                          type: string
+                          example: '210.05'
+                        adjustment_currency:
+                          type: string
+                          example: USD
+                        adjustment_reason:
+                          type: string
+                          example: Block billing guideline violation.
+                        original_line_item: *ref_7
+                        adjusted_line_item: *ref_7
+                  payments: &ref_23
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        payment_type:
+                          type: string
+                          enum:
+                            - CHECK
+                            - WIRE
+                            - ACH
+                            - CREDIT_CARD
+                          example: WIRE
+                        datetime:
+                          type: string
+                          description: >-
+                            The date and time of the payment represented as an
+                            offest from UTC using ISO 8601.
+                          example: '2020-04-19T15:55:12-04:00'
+                        payment_amount:
+                          type: string
+                          example: '25000.00'
+                        payment_currency:
+                          type: string
+                          example: USD
+                        payment_reference:
+                          type: string
+                          description: >-
+                            The reference information for the payment, for
+                            example, the check number. For Wire and ACH this
+                            should be the confirmation number.
+                          example: '3384455'
+                        payee:
+                          type: string
+                          description: The entity to whom the payment was made.
+                          example: Moose and Squirrel.
+                        paid_to_account:
+                          type: string
+                          description: >-
+                            The account to which the payment was made for
+                            paymentType’s of Wire, ACH, and Credit.
+                          example: '55778674'
+        '404':
+          description: Not found. No invoice with that id.
+  /matter/{client_matter_id}/accruals:
+    put:
+      parameters:
+        - in: path
+          name: client_matter_id
+          schema:
+            type: string
+            description: >-
+              the unique identifier for the matter, according to either client
+              system.
+      tags:
+        - Accruals
+      summary: Update the accruals data for one matter
+      description: Proposal - update the accrual figures for a single matter.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accrual_currency: &ref_8
+                  type: string
+                  description: >-
+                    The currency for these accruals. The three-character
+                    ISO-4217 currency code.
+                accrual_net_total: &ref_9
+                  type: string
+                  description: >-
+                    The total accruals, net of any adjustments. This should be a
+                    string of numbers, followed by a decimal place, followed by
+                    two or four numbers depending on exponent (number of minor
+                    units) in the currency.
+                fee_accrual_net_total: &ref_10
+                  type: string
+                  description: >-
+                    The total of fees accrued, net of any adjustments. This
+                    should be a string of numbers, followed by a decimal place,
+                    followed by two or four numbers depending on exponent
+                    (number of minor units) in the currency.
+                expense_accrual_net_total: &ref_11
+                  type: string
+                  description: >-
+                    The total expenses accrued, net of any adjustments. This
+                    should be a string of numbers, followed by a decimal place,
+                    followed by two or four numbers depending on exponent
+                    (number of minor units) in the currency.
+                monthly_accrual_net_totals:
+                  type: array
+                  description: Optional accruals totals broken down by calendar month.
+                  items: &ref_12
+                    type: object
+                    properties:
+                      month:
+                        type: string
+                        description: Calendar month in YYYYMM format.
+                      accrual_currency: *ref_8
+                      accrual_net_total: *ref_9
+                      fee_accrual_net_total: *ref_10
+                      expense_accrual_net_total: *ref_11
+                    required:
+                      - month
+                      - accrual_currency
+                      - accrual_net_total
+                line_items:
+                  type: array
+                  description: >-
+                    Optional individual line item detail for expenses and fees
+                    accruals on this matter.
+                  items:
+                    anyOf:
+                      - &ref_14
+                        properties:
+                          line_item_number:
+                            type: string
+                            description: >-
+                              Unique identifier for this line item within the
+                              law firm.
+                            example: '181632'
+                          line_item_unit_cost:
+                            type: string
+                            description: >-
+                              The standard (i.e., undiscounted) unit cost,
+                              before taxes, of the line item. For fees, this
+                              would be the hourly rate. For expenses, this would
+                              be the cost per unit.
+                            example: 260
+                          line_item_number_of_units:
+                            type: string
+                            description: >-
+                              The number of units billed on this line item. For
+                              fee items, this is the number of hours being
+                              billed. For expense items, this is the number of
+                              items being expensed.
+                            example: 1.75
+                          line_item_adjustment_amount:
+                            type: string
+                            description: >-
+                              The numerical value of any adjustment applied to
+                              this line item. A positive value indicates a
+                              premium, a negative value indicates a discount. A
+                              null ("") or zero ("0") value indicates no
+                              adjustment.
+                            example: 0
+                          line_item_total:
+                            type: string
+                            description: >-
+                              The numerical value of this line item. This must
+                              be (line_item_unit_cost *
+                              line_item_number_of_units) +
+                              line_item_adjustment_amount. A null value ("")
+                              would be an error.
+                            example: 100
+                          line_item_currency:
+                            type: string
+                            description: >-
+                              The three-character ISO-4217 currency code for
+                              this line item.
+                            example: USD
+                          line_item_date:
+                            type: string
+                            description: >-
+                              The date the fees/expenses were incurred, in
+                              YYYYMMDD format.
+                            example: '20191127'
+                          line_item_description:
+                            type: string
+                            description: Free form description of this line item.
+                            example: abc
+                          line_item_task_code:
+                            type: string
+                            description: >-
+                              The task code (e.g., using the UTBMS code set) for
+                              this line item.
+                            example: L101
+                          line_item_type:
+                            type: string
+                            description: The type of line item. E - Expense. F - Fee.
+                            enum:
+                              - Fee
+                              - Expense
+                          line_item_activity_code:
+                            type: string
+                            description: >-
+                              The activity code (e.g., using the UTBMS code set)
+                              for this fee line item. Most expense items
+                              probably do not have a entry associated with them
+                              (in which case this field would be left null).
+                            example: A118
+                          timekeeper_id:
+                            type: string
+                            description: >-
+                              A unique identifier within the law firm for the
+                              timekeeper for this line entry.
+                            example: '1835'
+                          timekeeper_first_name:
+                            type: string
+                            description: The first name of a timekeeper.
+                            example: Robert
+                          timekeeper_last_name:
+                            type: string
+                            description: The last name of a timekeeper.
+                            example: Amsley
+                          timekeeper_classsification:
+                            type: string
+                            description: >-
+                              The staff classification of a timekeeper.  A full
+                              list of the codes to use can be found in the LEDES
+                              Revised Timekeeper Classifications Reference
+                              Document available on LEDES.org.
+                            example: PARTNR
+                        required:
+                          - line_item_number
+                          - line_item_type
+                          - line_item_total
+                          - line_item_date
+                          - line_item_unit_cost
+                          - line_item_number_of_units
+                      - &ref_13
+                        properties:
+                          line_item_number:
+                            type: string
+                            description: >-
+                              Unique identifier for this line item within the
+                              law firm.
+                            example: '181632'
+                          line_item_unit_cost:
+                            type: string
+                            description: >-
+                              The standard (i.e., undiscounted) unit cost,
+                              before taxes, of the line item. For fees, this
+                              would be the hourly rate. For expenses, this would
+                              be the cost per unit.
+                            example: 260
+                          line_item_number_of_units:
+                            type: string
+                            description: >-
+                              The number of units billed on this line item. For
+                              fee items, this is the number of hours being
+                              billed. For expense items, this is the number of
+                              items being expensed.
+                            example: 1.75
+                          line_item_adjustment_amount:
+                            type: string
+                            description: >-
+                              The numerical value of any adjustment applied to
+                              this line item. A positive value indicates a
+                              premium, a negative value indicates a discount. A
+                              null ("") or zero ("0") value indicates no
+                              adjustment.
+                            example: 0
+                          line_item_total:
+                            type: string
+                            description: >-
+                              The numerical value of this line item. This must
+                              be (line_item_unit_cost *
+                              line_item_number_of_units) +
+                              line_item_adjustment_amount. A null value ("")
+                              would be an error.
+                            example: 100
+                          line_item_currency:
+                            type: string
+                            description: >-
+                              The three-character ISO-4217 currency code for
+                              this line item.
+                            example: USD
+                          line_item_date:
+                            type: string
+                            description: >-
+                              The date the fees/expenses were incurred, in
+                              YYYYMMDD format.
+                            example: '20191127'
+                          line_item_description:
+                            type: string
+                            description: >-
+                              Free form description of this line item, that
+                              provides specific detail beyond the expense code.
+                            example: Translaction services
+                          line_item_task_code:
+                            type: string
+                            description: >-
+                              The task code (e.g., using the UTBMS code set) for
+                              this line item.
+                            example: L110
+                          line_item_type:
+                            type: string
+                            description: The type of line item. E - Expense. F - Fee.
+                            enum:
+                              - Fee
+                              - Expense
+                          line_item_expense_code:
+                            type: string
+                            description: >-
+                              The expense code (e.g., using the UTBMS code set)
+                              for this expense line item.
+                            example: X139
+                        required:
+                          - line_item_number
+                          - line_item_type
+                          - line_item_total
+                          - line_item_date
+                          - line_item_unit_cost
+                          - line_item_number_of_units
+                          - line_item_expense_code
+                    discriminator:
+                      propertyName: line_item_type
+                      mapping:
+                        Fee: '#/components/schemas/Fee'
+                        Expense: '#/components/schemas/Expense'
+              example:
+                accrual_currency: USD
+                accrual_net_total: '15600.00'
+                fee_accrual_net_total: '10000.00'
+                expense_accrual_net_total: '5600.00'
+                monthly_accrual_net_totals:
+                  - month: '202001'
+                    accrual_currency: USD
+                    accrual_net_total: '1600.00'
+                    fee_accrual_net_total: '1000.00'
+                    expense_accrual_net_total: '600.00'
+                  - month: '202002'
+                    accrual_currency: USD
+                    accrual_net_total: '14000.00'
+                    fee_accrual_net_total: '9000.00'
+                    expense_accrual_net_total: '5000.00'
+                line_items:
+                  - line_item_number: 45294
+                    line_item_type: F
+                    line_item_unit_cost: '500.00'
+                    line_item_number_of_units: '2'
+                    line_item_total: '1000.00'
+                    line_item_currency: USD
+                    line_item_date: '20200115'
+                    line_item_activity_code: A101
+                    line_item_task_code: L120
+                    line_item_description: Planning case
+                    timekeeper_id: 345
+                    timekeeper_first_name: Lisa
+                    timekeeper_last_name: Jones
+                    timekeeper_classsification: ASSOC
+                  - line_item_number: 45298
+                    line_item_type: E
+                    line_item_unit_cost: '10.00'
+                    line_item_number_of_units: '60'
+                    line_item_total: '600.00'
+                    line_item_currency: USD
+                    line_item_date: '20200118'
+                    line_item_task_code: L140
+                    line_item_expense_code: X101
+                    line_item_description: Printing costs
+                  - line_item_number: 45455
+                    line_item_type: F
+                    line_item_unit_cost: '500.00'
+                    line_item_number_of_units: '7'
+                    line_item_adjustment_amount: '-500.00'
+                    line_item_total: '3000.00'
+                    line_item_currency: USD
+                    line_item_date: '20200215'
+                    line_item_task_code: L310
+                    line_item_activity_code: A104
+                    line_item_description: Reviewing contract
+                    timekeeper_id: 345
+                    timekeeper_first_name: Lisa
+                    timekeeper_last_name: Jones
+                    timekeeper_classsification: ASSOC
+                  - line_item_number: 45458
+                    line_item_type: F
+                    line_item_unit_cost: '1000.00'
+                    line_item_number_of_units: '6'
+                    line_item_total: '6000.00'
+                    line_item_currency: USD
+                    line_item_date: '20200216'
+                    line_item_task_code: L320
+                    line_item_activity_code: A104
+                    line_item_description: Reviewing contract
+                    timekeeper_id: 102
+                    timekeeper_first_name: Fiona
+                    timekeeper_last_name: Williams
+                    timekeeper_classsification: PARTNR
+                  - line_item_number: 45475
+                    line_item_type: E
+                    line_item_unit_cost: '5000.00'
+                    line_item_number_of_units: '1'
+                    line_item_total: '5000.00'
+                    line_item_currency: USD
+                    line_item_date: '20200218'
+                    line_item_task_code: L320
+                    line_item_expense_code: X115
+                    line_item_description: Out of town travel - flights
+              required:
+                - law_firm_matter_id
+                - accrual_currency
+                - accrual_net_total
+      responses:
+        '200':
+          description: Accrual updated correctly
+        '404':
+          description: Not Found. Matter could not be found.
+        '501':
+          description: >-
+            Not implemented. For use if the server never supports the use of the
+            discriminator provided, either law_firm_matter_id or
+            client_matter_id.
+    delete:
+      tags:
+        - Accruals
+      summary: Delete accruals for a matter
+      description: >-
+        Delete the accurals for a matter. The accrual figures should be set to
+        null, not zero.
+      parameters:
+        - in: path
+          name: client_matter_id
+          schema:
+            type: string
+            description: >-
+              the unique identifier for the matter, according to either the law
+              firm system or client system.
+      responses:
+        '200':
+          description: Accruals deleted.
+        '404':
+          description: Matter not found.
+        '501':
+          description: >-
+            Not implemented. For use if the server never supports the use of the
+            discriminator provided, either law_firm_matter_id or
+            client_matter_id.
+tags:
+  - name: Invoices
+    description: >
+      Manage invoice data. For illustrative purposes we've also taken version
+      2.2 of the
+
+      XML LEDES ebilling specification and adapted it to a JSON representation.
+  - name: Accruals
+    description: >-
+      Manage accrual data; fees and expenses that have been recorded but not yet
+      invoiced.
+components:
+  schemas:
+    invoice_post:
+      properties:
+        ledes_format: &ref_15
+          type: string
+          description: The LEDES invoice file format
+          enum:
+            - LEDES98B
+            - LEDES98BI
+            - LEDES98BIV2
+            - LEDES2000
+            - LEDESXML20
+            - LEDESXML21
+          example: LEDES98BI
+        encrypted: &ref_16
+          type: boolean
+          description: Whether the ledesfile is encrypted or not.
+          example: 'True'
+        ledes_filename: &ref_17
+          type: string
+          example: Invoice1234.234.xml
+          description: >-
+            The name of the LEDES file. This does not need to be unique or be
+            the invoice number, which is a common filename for LEDES file. It
+            can simply be the filename of the LEDES file on the sending system
+            side for reference purposes. This should be the filename without
+            mime type (ie. INV-2019-123). This should not include any network or
+            folder path information. Receiving systems can set a limit for the
+            length of filenames with the appropriate error message described
+            below.
+        ledes_file_media_type: &ref_18
+          type: string
+          description: The LEDES invoice file format
+          enum:
+            - text/plain
+            - text/csv
+          example:
+            - text/csv
+        invoice_type: &ref_19
+          type: string
+          description: The type of invoice being submitted.
+          enum:
+            - INVOICE
+            - ACCRUAL
+            - SHADOW
+            - RESUBMIT
+            - APPEAL
+            - REPLACEMENT
+          example:
+            - INVOICE
+        related_invoice_id: &ref_20
+          type: integer
+          description: >-
+            The Invoice ID of a related invoice that the submitted invoice is
+            associated. For example, if an invoice is rejected and then a new
+            invoice is submitted with adjustments or as an appeal, this would be
+            the invoice ID of the originally submitted invoice. This is required
+            for invoiceTypes of resubmit, appeal and replacement.
+          example: 58912746
+        comment: &ref_24
+          type: string
+          description: Description of the invoice.
+          example:
+            - Invoice for May 2020 for Matter 12345.
+      required:
+        - ledes_format
+        - encrypted
+        - ledes_filename
+        - ledes_file_media_type
+        - invoice_type
+    law_firm_matter_id:
+      type: string
+      description: The law firm assigned matter code, unique within that law firm's system.
+      example: '873467'
+    accrual_currency: *ref_8
+    accrual_net_total: *ref_9
+    fee_accrual_net_total: *ref_10
+    expense_accrual_net_total: *ref_11
+    monthly_accrual_net_total: *ref_12
+    accrual_line_item:
+      type: object
+    Expense: *ref_13
+    Fee: *ref_14
+    ledes_format: *ref_15
+    encrypted: *ref_16
+    ledes_filename: *ref_17
+    ledes_file_media_type: *ref_18
+    invoice_type: *ref_19
+    related_invoice_id: *ref_20
+    invoice_status: *ref_6
+    invoice_errors: *ref_21
+    invoice_adjustments: *ref_22
+    line_item: *ref_7
+    invoice_payments: *ref_23
+    comment: *ref_24
+  parameters:
+    invoiceid: *ref_5
