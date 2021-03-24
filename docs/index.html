@@ -18,30 +18,8 @@
     </style>
   </head>
   <body>
-    <redoc spec-url='ledes.json'></redoc>
+    <div id="redoc-container"></div>
     <script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"> </script>
-    <script>
-      Redoc.init('/openapifile', {
-        theme: {
-          colors: {
-            success: {
-              main: '#59a815'
-            },
-            error: {
-              main: '#f54844'
-            },
-            http: {
-              get: '#59a815'
-            },
-          },
-          typography: {
-            fontFamily: 'Lato,Helvetica,Arial,sans-serif',
-            headings: {
-              fontFamily: 'Lato,Helvetica,Arial,sans-serif',
-            }
-          },
-        }
-      }, document.getElementById('redoc-container'))
-    </script>
+    <script src="/static/documentation.js"></script>
   </body>
 </html>

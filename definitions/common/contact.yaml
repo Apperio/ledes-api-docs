@@ -1,0 +1,29 @@
+# Address
+type: object
+description: Contact Information
+required:
+  - contact_lname
+  - contact_fname
+  - contact_email
+properties:
+  contact_lname:
+    type: string
+    description: First name
+    example: Alice
+  contact_fname:
+    type: string
+    description: Second name
+    example: Hobbs
+  contact_id:
+    type: string
+    description: Contact ID
+  contact_phone:
+    type: string
+    description: Phone number
+  contact_fax:
+    type: string
+    description: Contact Fax  
+  contact_email:
+    type: string
+    description: Contact email
+    example: ahobbs@example.org

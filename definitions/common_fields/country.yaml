@@ -1,0 +1,8 @@
+# Country
+type: string
+description: |
+  The country.  Use ISO 3166 country code set forth by International Standards
+  Organization (www.iso.org.)  
+example: GB
+minLength: 2
+maxLength: 3

@@ -1,0 +1,48 @@
+# Client
+type: object
+description: |
+  The Client and their invoices
+required:
+  - cl_lf_id
+  - cl_name
+  - cl_address
+properties:
+  cl_id:
+    type: string
+    description: The law firm assigned client code.
+    example: CLI12345
+  cl_lf_id:
+    type: string
+    description: |
+      A vendor ID that uniquely identifies the law firm, as specified by the client.
+      Could be the law firm's tax id number or other value used by the client to uniquely
+      identify the law firm.
+      Values required in this field may vary from client to client, but within a client's
+      e-billing implementation only one such unique ID is allowed per law firm.
+      Some client AP systems maintain multiple vendor IDs for a law firm that could be,
+      for example, location dependent.  It is not intended that multiple lf_vendor_ids for
+      the same law firm would be supported by this field as they would be impossible to
+      program into the law firm's time and billing software.  Clients must choose only one
+      unique identifier per law firm to be used in this field.  
+    example: CLI12345
+  cl_name:
+    type: string
+    description: |
+      The name of the client as required by the client in the electronic submission.
+      Used as a key by the receiving system.  
+    example: Acme Corp
+  cl_address:
+    $ref: '../common/address.yaml'
+  client_contact:
+    $ref: '../common/contact.yaml'
+  cl_tax_id:
+    type: string
+    description: The client's tax id number to which law firm taxes are charged.
+  extend_header:
+    type: array
+    items:
+      $ref: '../common/extend_header.yaml'
+  invoices:
+    type: array
+    items:
+      $ref: './invoice.yaml'

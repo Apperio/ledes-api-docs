@@ -1,0 +1,6 @@
+# Currency
+type: string
+example: "GBP"
+description: ISO 4217 Three letter currency code
+minLength: 3
+maxLength: 3

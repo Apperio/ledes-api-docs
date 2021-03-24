@@ -6,11 +6,96 @@ info:
     This is an illustration of how the OpenAPI specification could be used to document the LEDES API for the [ledes.org](https://ledes.org/ledes-api/).
     It is not complete and field names and enum values have been changed to conform to a different lettercase convention (rather than CamelCase).
 
-    The public githib repo for this site is available on [https://github.com/Apperio/ledes-api-docs](https://github.com/Apperio/ledes-api-docs) where you 
+    The public github repo for this site is available on [https://github.com/Apperio/ledes-api-docs](https://github.com/Apperio/ledes-api-docs) where you 
     can see the [yaml](https://github.com/Apperio/ledes-api-docs/blob/master/openapi.yml) file that was used to generate this page.
 
     The paths defined in the this URL must be relative to a base URL that contains a unique discriminator for that business, within what could potentially be
     a multitenant solution.
+
+    # Security
+
+    > I've taken a section from the word document to demonstrate how static content
+    > is rendered.
+    
+    Security is paramount in the solution since legal invoices can contain highly private
+    information. For example, the invoice line item descriptions and matter names can
+    contain highly sensitive information. A comprehensive security structure is highly
+    recommended, however, the LEDES API standard requires common security measures.
+    Transmission encryption and session authentication are required, with recommended
+    levels.  Content encryption is also highly recommended to address additional
+    vulnerabilities in the management of sensitive data.  These security recommendations in
+    general will need to be re-evaluated on a regular basis.
+
+    ## Transmission Encryption Security
+    All data should be encrypted in transit including authentication credentials (passwords),
+    API keys, or JSON Web Tokens. This is needed to allow users to authenticate with the
+    service and protects the integrity of the transmitted data.
+    
+    This first level of security can be achieved with HTTPS (TLS) and the use of mutually
+    authenticated client-side certificates to provide additional protection for the LEDES
+    API standard.  If implemented, client certificates will need to be managed between the
+    law firm (sending system) and e-billing vendor (receiving system) by having certificates
+    built from special 'roots'.
+ 
+    *Minimum Requirement:*  HTTPS (TLS 1.1+)
+
+    *Recommendation:* Client Certificates
+
+    *Implementation:* Vendor application (all vendors)
+
+    *User:* no action required
+
+    ## Session Authentication Security
+    Once transmission is secure, interaction with the user must be addressed.
+    This can be addressed by employing a secure authentication and session management
+    mechanism. User authorization for resources and data must be orchestrated through
+    multiple vulnerability points, such as access permissions, session duration, and global
+    logout.
+
+    The widely adopted protocols for authentication and session management today are
+    OAuth 2.0 and OpenID Connect.  OAuth 2.0 introduces an authorization layer and separates
+    the web client from the sensitive system resources.  The user is issued unique
+    credentials, which protects the credentials used to manage these resources.
+    OpenID Connect works with OAuth 2.0 to add an identity layer on top of the authentication
+    layer, so more sophisticated permissions can be orchestrated in the application. 
+
+    Requirements and recommendations are listed as “or equivalent” in recognition of
+    multiple Identity Providers a vendor may subscribe to in order to offer appropriate
+    authentication security.  Popular Identity Providers include Amazon, Google, and
+    Microsoft, however no provider is endorsed or recommended here.
+
+    *Minimum Requirement:* OAuth 2.0 (or equivalent)
+
+    *Recommendation:* Open ID (or equivalent)
+
+    *Implementation:* Vendor applications and system (or service) integration
+
+    *User:* one-time authorization set up
+
+    ## Content Encryption Security
+    All invoice and related data should be encrypted while in use and at rest.  This is the
+    final measure recommended to provide adequate security through the full life cycle of
+    the data and application.
+    There are multiple methods to provide content encryption and it is highly recommended
+    that any new implementation decisions are part of a comprehensive analysis of current
+    application and system integration vulnerabilities between vendors and with their end
+    users. The current specification for encryption established by the U.S. National
+    Institutes of Standards and Technology (NIST) and adopted globally is Advanced
+    Encryption Standard (AES).  This is a symmetric key approach, with accepted key lengths
+    of 128, 192, and 256 bits.  Recent successful attacks on 128 bit keys suggest it is
+    appropriate to consider the use of longer keys.
+
+    The API allows for the content to be optionally encrypted before it is transmitted,
+    however it is not required. It is highly recommended that eBilling vendor support
+    content encryption, however not all time and billing systems may support it. Below are
+    the requirements for when the content is encrypted.
+
+    *Minimum Requirement:* AES-256 (or equivalent) if content encryption is used.
+
+    *Implementation:* Vendor applications and system integration
+
+    *User:* one-time authorization set up
+
   contact:
     email: loc@ledes.org, stephen@apperio.com
   license:
@@ -20,45 +105,27 @@ servers:
   - url: https://api.example.com/api/v1/businesses/{business_id}
     description: The base URL contains a server URL, and an endpoint path that includes a unique identifier for that business, within the vendor platform.
 paths:
-  /invoices:
+  /v1/business/{business-id}/invoices:
     post:
       tags:
         - Invoices
-      summary: Submit an invoice
+      parameters:
+        - name: business-id
+          in: path
+          schema:
+            type: uuid
+            description: Business Identifier
+            example: 194829D1-C7E6-44F0-82B0-7223C54F7F76
+      summary: |
+        Submit an batch of invoices.
       requestBody:
         description: |
-          Send an invoice using one of the existing LEDES file formats (ie. LEDES XML) as a file.
-
-          This is the main method to send an existing LEDES invoice file.
-          The LEDES file can be optionally encrypted.
-          NOTE: It is already required that all data be encrypted in transit, so this would be additional encryption
-          of the LEDES file, which would then require a mechanism for the receiving system to be able to unencrypt
-          the LEDES file. If encrypted, the encryption method is part of the system setup. Returns an invoiceID,
-          receivedDateTime, and errors (see response below). The invoiceID is used for subsequent API calls to send
-          an attachment for the invoice or to get the status of the invoice. The vendor for the invoice should be
-          identified by the authentication and checked against the vendor identified within the LEDES files.'
+          The LEDES format based on LEDES XML Ebilling ver. 2.2
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              properties:
-                invoice:
-                  $ref: '#/components/schemas/invoice_post'
-                ledesfile:
-                  type: string
-                  format: binary
-              encoding:
-                ledesfile:
-                  contentType: text/plain, text/csv, application/xml
-            example:
-              invoice:
-                ledes_format: LEDES98BIV2
-                encrypted: False
-                ledes_filename: Invoice1234.234.xml
-                ledes_file_media_type: 'text/csv'
-                invoice_type: INVOICE
-              ledesfile: '<binary>'
+              $ref: 'definitions/invoice/invoice_bundle.yaml'
       responses:
         '201':
           description: Created
@@ -123,9 +190,6 @@ paths:
                           example: "Invalid invoice_type : LEDES99B"
         '403':
           description: User does not have permission to post invoices.
-        '415':
-          description: Unsupported media type. The server does not support this LEDES
-            file standard.
         '500':
           description: Internal server error.
   /invoices/{invoiceid}:
@@ -339,7 +403,9 @@ paths:
 
 tags:
   - name: Invoices
-    description: Manage invoice data.
+    description: |
+      Manage invoice data. For illustrative purposes we've also taken version 2.2 of the
+      XML LEDES ebilling specification and adapted it to a JSON representation.
   - name: Accruals
     description: Manage accrual data; fees and expenses that have been recorded but not yet invoiced.
 components:

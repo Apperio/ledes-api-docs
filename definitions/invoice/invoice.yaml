@@ -1,0 +1,28 @@
+# Invoice
+type: object
+description: Invoice information
+required:
+  - tx_id
+  - tx_id_number
+  - tax_type
+  - tax_tiers
+  - taxing_jurisdiction_country
+  - tax_on_tax
+  - is_increase
+properties:
+  inv_id:
+    type: string
+    description: |
+      The law firm assigned invoice number or code.
+      Multiple inv_id's can be billed in the same request. 
+    example: INV1234556
+  inv_date:
+    type: date
+    description: The invoice date
+    example: "2021-03-17"
+  inv_due_date:
+    type: date
+    description: The invoice due date
+    example: "2021-04-30"
+  inv_currency:
+    $ref: '../common_fields/currency.yaml'

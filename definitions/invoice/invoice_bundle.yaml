@@ -1,0 +1,19 @@
+# LEDES Upload
+type: object
+description: |
+  The LEDES format based on LEDES XML Ebilling ver. 2.2
+properties:
+  firms:
+    type: array
+    description: |
+      There will be one or more firms in a LEDES submission. This allows for the submission
+      of invoices for more than one firm in the same submission.
+    items:
+      $ref: './firm.yaml'
+  taxes:
+    type: array
+    description: |
+      There will be 0 or more @TAX segments per file.  If items are not taxed, no
+      @TAX section would be included in the file.  
+    items:
+      $ref: './tax.yaml'
