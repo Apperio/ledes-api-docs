@@ -7,9 +7,6 @@
   "scripts": {
     "start": "node development-server.js"
   },
-  "dependencies": {
-    "redoc": "^2.0.0-rc.45"
-  },
   "devDependencies": {
     "express": "^4.17.1",
     "js-yaml": "^4.0.0",
