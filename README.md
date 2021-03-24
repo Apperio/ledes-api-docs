@@ -9,7 +9,7 @@ npm install
 npm start
 ```
 
-Then navigate to http://localhost:3001. Refresh to see any changes you've made to `openapi.yml`.
+Then navigate to http://localhost:8080. Refresh to see any changes you've made to the specification.
 
 ## Public Hosted version
 
